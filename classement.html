@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classement - Gbai-Rai</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body class="page-classement">
+    <a href="home.html" class="back-link" aria-label="Retour en arrière" title="Retour en arrière">←</a>
+    <header class="site-header">
+        <div class="logo">Gbai<span>-</span>Rai</div>
+        <nav class="site-nav">
+            <a href="home.html">Accueil</a>
+            <a href="clash.html">Clashs</a>
+            <a href="classement.html" class="active">Classement</a>
+            <a href="#">Potins</a>
+            <a href="#">Gazette</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="duel-header">
+            <h1>Classement des votes</h1>
+            <p>Découvre le Top 5 du campus et consulte les statistiques détaillées de chaque participant.</p>
+        </section>
+
+        <section id="top-participant" class="top-card"></section>
+
+        <section class="top-five-grid" id="top-five"></section>
+
+        <section class="leaderboard-list" id="leaderboard-list"></section>
+    </main>
+
+    <div id="stats-modal" class="modal-overlay hidden">
+        <div class="modal-card" id="modal-content"></div>
+    </div>
+
+    <script src="../JS/a.js"></script>
+</body>
+</html>
