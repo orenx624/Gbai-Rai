@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console d'Administration - Gbai-Rai</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body class="page-admin-console">
+    <a href="home.html" class="back-link" aria-label="Retour en arrière" title="Retour en arrière">←</a>
+
+    <header class="site-header hidden" id="admin-header">
+        <div class="logo">Gbai<span>-</span>Rai <small style="font-size: 0.6em; color: var(--red);">[Console Admin]</small></div>
+        <nav class="site-nav">
+            <a href="home.html">Retour au Site</a>
+            <button id="admin-logout-top" class="btn btn-soft" style="padding: 0.4rem 1rem;">Déconnexion</button>
+        </nav>
+    </header>
+
+    <main class="container">
+        
+        <section id="admin-gate" class="web-grid" style="grid-template-columns: 1fr; max-width: 500px; margin: 4rem auto;">
+            <div class="card" style="border: 1px solid var(--purple); box-shadow: var(--shadow);">
+                <div class="card-header" style="text-align: center;">
+                    <h1 style="color: var(--purple); font-size: 2rem;">🔒 Accès Restreint</h1>
+                    <p style="color: var(--text-muted);">Identifiez-vous pour contrôler l'application</p>
+                </div>
+                
+                <div style="display: grid; gap: 1.2rem; padding: 1rem 0;">
+                    <div style="display: grid; gap: 0.4rem;">
+                        <label style="font-size: 0.9rem; color: var(--text-light);">Adresse Email Admin</label>
+                        <input id="gate-email" type="email" placeholder="Ex: admin@orstore.com" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                    </div>
+                    <div style="display: grid; gap: 0.4rem;">
+                        <label style="font-size: 0.9rem; color: var(--text-light);">Mot de passe secret</label>
+                        <input id="gate-password" type="password" placeholder="••••••••" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                    </div>
+                    <button id="gate-login-btn" class="btn btn-primary" style="background: var(--purple); border: none; padding: 0.9rem; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 0.5rem;">S'authentifier à la Console</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-workspace" class="web-grid hidden" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-top: 2rem; gap: 2rem;">
+            
+            <div class="card card-highlight" style="border-top: 4px solid var(--red);">
+                <div class="card-header">
+                    <h2>💬 Modération Fine par Participant</h2>
+                    <p>Sélectionnez un candidat pour auditer et supprimer ses commentaires un par un.</p>
+                </div>
+                <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                    <select id="mod-participant-selector" style="width: 100%; padding: 0.8rem; background: rgba(15,23,42,0.95); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem;">
+                        </select>
+                    
+                    <div id="mod-comments-stream" style="max-height: 400px; overflow-y: auto; display: grid; gap: 0.8rem; padding-right: 0.5rem;">
+                        </div>
+                </div>
+            </div>
+
+            <div class="card" style="border-top: 4px solid var(--secondary);">
+                <div class="card-header">
+                    <h2>🎯 Recrutement & Nouveaux Duels</h2>
+                    <p>Injectez de nouveaux candidats instantanément dans le flux de vote local.</p>
+                </div>
+                <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                    <input id="new-candidate-name" type="text" placeholder="Nom ou Pseudonyme" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                    <input id="new-candidate-photo" type="url" placeholder="URL de la Photo (Unsplash, imgur...)" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                    <select id="new-candidate-gender" style="width: 100%; padding: 0.8rem; background: rgba(15,23,42,0.95); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                        <option value="M">Masculin (Roi)</option>
+                        <option value="F">Féminin (Reine)</option>
+                    </select>
+                    <button id="add-candidate-btn" class="btn btn-secondary" style="font-weight: bold; padding: 0.8rem;">Déployer le Candidat</button>
+                </div>
+            </div>
+
+            <div class="card" style="border-top: 4px solid var(--red);">
+                <div class="card-header">
+                    <h2>🛠️ Gestion complète des candidats</h2>
+                    <p>Modifiez les profils, remplacez les photos et supprimez n'importe quel participant sans sortir de la console.</p>
+                </div>
+                <div id="participant-management-list" style="display: grid; gap: 0.8rem; margin-top: 1rem;"></div>
+            </div>
+
+            <div class="card" style="border-top: 4px solid var(--secondary);">
+                <div class="card-header">
+                    <h2>📢 Gestion Radio Couloir</h2>
+                    <p>Ajoutez, supprimez et faites défiler les infos du fil radio depuis cette console.</p>
+                </div>
+                <div style="display: grid; gap: 0.8rem; margin-top: 1rem;">
+                    <textarea id="new-radio-item-text" rows="3" placeholder="Écrivez une nouvelle information de la radio couloir..." style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff; resize: vertical;"></textarea>
+                    <button id="add-radio-item-btn" class="btn btn-secondary" style="font-weight: bold; padding: 0.8rem;">Ajouter à la Radio</button>
+                    <div id="radio-items-list" style="display: grid; gap: 0.6rem; margin-top: 0.2rem;"></div>
+                </div>
+            </div>
+
+            <div class="card" style="border-top: 4px solid var(--primary);">
+                <div class="card-header">
+                    <h2>⚙️ Configuration des Textes Publics</h2>
+                    <p>Modifiez en direct les titres, sous-titres et résumés affichés aux utilisateurs.</p>
+                </div>
+                <div style="display: grid; gap: 0.8rem; margin-top: 1rem;">
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Titre Global du Clash</label>
+                    <input id="cfg-clash-title" type="text" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 6px; color: #fff;">
+                    
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Description d'en-tête</label>
+                    <textarea id="cfg-clash-desc" rows="2" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 6px; color: #fff; resize: vertical;"></textarea>
+                    
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Carte d'information Gauche (Titre)</label>
+                    <input id="cfg-left-title" type="text" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 6px; color: #fff;">
+                    <textarea id="cfg-left-text" rows="2" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 6px; color: #fff; resize: vertical;"></textarea>
+
+                    <button id="save-cfg-btn" class="btn btn-primary" style="margin-top: 0.5rem; font-weight: bold;">Mettre à jour l'application</button>
+                </div>
+                
+                <hr style="border: 0; border-top: 1px solid var(--border); margin: 1.5rem 0;">
+                
+                <div class="admin-section">
+                    <h3 style="color: var(--red); font-size: 1rem; margin-bottom: 0.5rem;">🚨 Commandes Globales</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <button id="global-reset-votes" class="btn btn-soft" style="color: var(--red); font-size: 0.8rem; padding: 0.6rem;">RAZ Votes</button>
+                        <button id="global-clear-comments" class="btn btn-soft" style="color: var(--red); font-size: 0.8rem; padding: 0.6rem;">RAZ Coms</button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script src="../JS/admin-console.js"></script>
+</body>
+</html>
