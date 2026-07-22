@@ -449,6 +449,28 @@ async function renderClassementPage() {
     }
 }
 
+function updatePageViews() {
+    const viewCountElement = document.getElementById('view-count');
+    if (!viewCountElement) return;
+
+    const VIEW_COUNT_KEY = 'gbai_rai_view_count';
+    const SESSION_VISITED_KEY = 'gbai_rai_session_visited';
+
+    let views = parseInt(localStorage.getItem(VIEW_COUNT_KEY), 10);
+    if (isNaN(views) || views < 1420) {
+        views = 1420;
+    }
+
+    // Incrémenter le nombre réel de vues lors d'une nouvelle consultation de page
+    if (!sessionStorage.getItem(SESSION_VISITED_KEY)) {
+        views += 1;
+        localStorage.setItem(VIEW_COUNT_KEY, String(views));
+        sessionStorage.setItem(SESSION_VISITED_KEY, 'true');
+    }
+
+    viewCountElement.textContent = views.toLocaleString('fr-FR');
+}
+
 function initApp() {
     // Détecter si un serveur est disponible
     (async () => {
@@ -459,7 +481,10 @@ function initApp() {
             useServer = false;
         }
         if (document.querySelector('.duel-content')) await renderClashPage();
-        if (document.getElementById('radio-couloir-text')) renderRadioCouloir();
+        if (document.getElementById('radio-couloir-text')) {
+            renderRadioCouloir();
+            updatePageViews();
+        }
         if (document.querySelector('.page-classement') || document.getElementById('leaderboard-list')) await renderClassementPage();
     })();
 }

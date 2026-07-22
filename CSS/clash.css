@@ -1,0 +1,258 @@
+.duel-page {
+    min-height: calc(100vh - 100px);
+}
+
+.duel-card,
+.comment-column {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+}
+
+.duel-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.duel-header h1 {
+    font-size: clamp(2rem, 3vw, 2.6rem);
+}
+
+.duel-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.duel-wrapper {
+    overflow: hidden;
+    border-radius: 24px;
+}
+
+.duel-content {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    gap: 1rem;
+    align-items: start;
+    transition: transform 0.35s ease;
+}
+
+.slide-left { transform: translateX(-100%); }
+.slide-right { transform: translateX(100%); }
+
+.photo-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 520px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+}
+
+.photo-card img {
+    width: 100%;
+    border-radius: 24px;
+    object-fit: cover;
+    min-height: 280px;
+    max-height: clamp(220px, 45vh, 320px);
+}
+
+.photo-card h2 {
+    font-size: 1.2rem;
+}
+
+.vote-block {
+    display: flex;
+    gap: 0.75rem;
+    flex-direction: column;
+}
+
+.vote-block .btn {
+    width: 100%;
+}
+
+.action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.vote-status {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+}
+
+.comment-bubble {
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 1rem;
+}
+
+.comment-list {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1rem;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.comment-list .comment-item,
+.bottom-comments-list .comment-item {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 0.9rem 1rem;
+}
+
+.bubble-inner {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.comment-bubble textarea {
+    width: 100%;
+    min-height: 110px;
+    resize: vertical;
+    border: none;
+    outline: none;
+    padding: 1rem;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+.comment-bubble textarea::placeholder {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.bubble-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.bottom-comments {
+    margin-top: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 1rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.bottom-comments-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.bottom-comments-list {
+    display: grid;
+    gap: 0.85rem;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.bottom-comments-list .comment-item {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    padding: 1rem 1.1rem;
+}
+
+.bottom-comments-list .comment-item small {
+    display: block;
+    margin-top: 0.6rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.78rem;
+}
+
+.bottom-comments h3,
+.bottom-comments p {
+    margin: 0;
+}
+
+.btn-next {
+    margin: 2rem auto 0;
+    display: inline-flex;
+    padding: 0.95rem 1.5rem;
+    color: #0f172a;
+    background: var(--primary);
+    border-radius: 999px;
+    width: max-content;
+}
+
+@media (max-width: 900px) {
+    .duel-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .duel-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 680px) {
+    .duel-header {
+        margin-bottom: 1rem;
+    }
+
+    .duel-content {
+        display: flex;
+        flex-direction: row;
+        gap: 0.75rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .photo-card {
+        flex: 0 0 calc(50% - 0.4rem);
+        min-width: min(47vw, 220px);
+        min-height: auto;
+        padding: 1rem;
+        scroll-snap-align: start;
+    }
+
+    .photo-card img {
+        min-height: 180px;
+        max-height: 200px;
+        height: 180px;
+    }
+
+    .action-bar {
+        flex-direction: column;
+    }
+
+    .bubble-actions {
+        flex-direction: column;
+    }
+
+    .btn-next {
+        margin: 1.2rem auto 0;
+        display: inline-flex;
+        justify-content: center;
+        align-self: center;
+    }
+}
+
+@media (max-width: 640px) {
+    .comment-column {
+        border-radius: 18px;
+    }
+}

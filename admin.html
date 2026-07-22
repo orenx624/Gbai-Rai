@@ -4,22 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Console d'Administration - Gbai-Rai</title>
-    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="CSS/common.css">
+    <link rel="stylesheet" href="CSS/admin.css">
 </head>
 <body class="page-admin-console">
-    <a href="home.html" class="back-link" aria-label="Retour en arrière" title="Retour en arrière">←</a>
-
-    <header class="site-header hidden" id="admin-header">
-        <div class="logo">Gbai<span>-</span>Rai <small style="font-size: 0.6em; color: var(--red);">[Console Admin]</small></div>
+    <header class="site-header" id="admin-header">
+        <div class="logo-wrapper">
+            <a href="index.html" class="back-link" aria-label="Retour en arrière" title="Retour en arrière">←</a>
+            <div class="logo">Gbai<span>-</span>Rai <small style="font-size: 0.6em; color: var(--red);">[Console Admin]</small></div>
+        </div>
         <nav class="site-nav">
-            <a href="home.html">Retour au Site</a>
-            <button id="admin-logout-top" class="btn btn-soft" style="padding: 0.4rem 1rem;">Déconnexion</button>
+            <a href="index.html">Accueil</a>
+            <button id="admin-logout-top" class="btn btn-soft hidden" style="padding: 0.4rem 1rem;">Déconnexion</button>
         </nav>
     </header>
 
     <main class="container">
         
-        <section id="admin-gate" class="web-grid" style="grid-template-columns: 1fr; max-width: 500px; margin: 4rem auto;">
+        <section id="admin-gate" class="web-grid" style="grid-template-columns: 1fr; max-width: 500px; margin: 3rem auto;">
             <div class="card" style="border: 1px solid var(--purple); box-shadow: var(--shadow);">
                 <div class="card-header" style="text-align: center;">
                     <h1 style="color: var(--purple); font-size: 2rem;">🔒 Accès Restreint</h1>
@@ -27,14 +29,23 @@
                 </div>
                 
                 <div style="display: grid; gap: 1.2rem; padding: 1rem 0;">
+                    <div style="background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 0.85rem; font-size: 0.85rem; color: var(--text-light); text-align: center;">
+                        🔑 <strong>Identifiants de connexion :</strong><br>
+                        Identifiant : <code>admin</code> (ou <code>admin@orstore.com</code>)<br>
+                        Mot de passe : <code>admin</code>
+                    </div>
+
                     <div style="display: grid; gap: 0.4rem;">
-                        <label style="font-size: 0.9rem; color: var(--text-light);">Adresse Email Admin</label>
-                        <input id="gate-email" type="email" placeholder="Ex: admin@orstore.com" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                        <label style="font-size: 0.9rem; color: var(--text-light);">Adresse Email ou Identifiant Admin</label>
+                        <input id="gate-email" type="text" placeholder="admin" value="admin" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
                     </div>
                     <div style="display: grid; gap: 0.4rem;">
                         <label style="font-size: 0.9rem; color: var(--text-light);">Mot de passe secret</label>
-                        <input id="gate-password" type="password" placeholder="••••••••" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                        <input id="gate-password" type="password" placeholder="••••••••" value="admin" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
                     </div>
+                    
+                    <div id="gate-error" class="hidden" style="color: var(--red); font-size: 0.88rem; text-align: center; font-weight: bold; background: rgba(239,68,68,0.15); padding: 0.5rem; border-radius: 6px;"></div>
+
                     <button id="gate-login-btn" class="btn btn-primary" style="background: var(--purple); border: none; padding: 0.9rem; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 0.5rem;">S'authentifier à la Console</button>
                 </div>
             </div>

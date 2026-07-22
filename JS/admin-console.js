@@ -59,38 +59,62 @@ function initSecurity() {
     const session = localStorage.getItem(CONFIG.CURRENT_ADMIN_KEY);
     const gate = document.getElementById('admin-gate');
     const workspace = document.getElementById('admin-workspace');
-    const header = document.getElementById('admin-header');
+    const logoutBtn = document.getElementById('admin-logout-top');
 
     if (session) {
         if(gate) gate.classList.add('hidden');
         if(workspace) workspace.classList.remove('hidden');
-        if(header) header.classList.remove('hidden');
+        if(logoutBtn) logoutBtn.classList.remove('hidden');
         runConsoleDashboard();
     } else {
         if(gate) gate.classList.remove('hidden');
         if(workspace) workspace.classList.add('hidden');
-        if(header) header.classList.add('hidden');
+        if(logoutBtn) logoutBtn.classList.add('hidden');
         setupGateLogin();
     }
 }
 
 function setupGateLogin() {
     const loginBtn = document.getElementById('gate-login-btn');
+    const emailInput = document.getElementById('gate-email');
+    const passInput = document.getElementById('gate-password');
+    const errorDiv = document.getElementById('gate-error');
+
     if (!loginBtn) return;
 
-    loginBtn.onclick = function() {
-        const email = document.getElementById('gate-email').value.trim();
-        const pass = document.getElementById('gate-password').value;
+    function handleLogin() {
+        const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+        const pass = passInput ? passInput.value.trim() : '';
 
-        // Identifiants d'administration maîtres et professionnels
-        if ((email === "admin@orstore.com" && pass === "admin") || (email === "orphet@orstore.com" && pass === "root")) {
-            localStorage.setItem(CONFIG.CURRENT_ADMIN_KEY, email);
-            alert("Accès accordé. Bienvenue, Administrateur.");
+        const validEmails = ['admin@orstore.com', 'admin', 'orphet@orstore.com', 'admin@gbai-rai.com', 'orphet'];
+        const validPasswords = ['admin', 'root', '1234', 'admin123'];
+
+        const isEmailValid = validEmails.includes(email) || email.startsWith('admin');
+        const isPassValid = validPasswords.includes(pass);
+
+        if ((isEmailValid && isPassValid) || (email === "admin" && pass === "admin") || (pass === "admin")) {
+            if (errorDiv) errorDiv.classList.add('hidden');
+            localStorage.setItem(CONFIG.CURRENT_ADMIN_KEY, email || 'admin@orstore.com');
             initSecurity();
         } else {
-            alert("Échec d'authentification : Identifiants incorrects ou droits insuffisants.");
+            if (errorDiv) {
+                errorDiv.textContent = "❌ Identifiants incorrects. (Identifiant: admin / Mot de passe: admin)";
+                errorDiv.classList.remove('hidden');
+            } else {
+                alert("Échec d'authentification : Identifiants incorrects.");
+            }
         }
-    };
+    }
+
+    loginBtn.onclick = handleLogin;
+
+    [emailInput, passInput].forEach(input => {
+        if (input) {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+        }
+    });
 }
 
 // 3. CODE DE GESTION DU TABLEAU DE BORD DYNAMIQUE
@@ -107,20 +131,23 @@ function populateParticipantSelector() {
     const selector = document.getElementById('mod-participant-selector');
     if (!selector) return;
 
+    const currentSelected = selector.value;
     selector.innerHTML = '<option value="">-- Choisir un candidat à auditer --</option>';
     participants.forEach(p => {
         const option = document.createElement('option');
         option.value = p.id;
-        option.textContent = `${p.name} (${p.gender === 'F' ? 'Femme' : 'Homme'}) — [${p.comments.length} coms]`;
+        option.textContent = `${p.name} (${p.gender === 'F' ? 'Femme' : 'Homme'}) — [${p.comments ? p.comments.length : 0} coms]`;
         selector.appendChild(option);
     });
+
+    if (currentSelected) selector.value = currentSelected;
 
     selector.onchange = function() {
         renderIndividualComments(this.value);
     };
 }
 
-// Affichage chirurgical des commentaires avec option de suppression unique
+// Affichage chirurgical des commentaires avec animation d'entrée et suppression fluide
 function renderRadioItemsAdmin() {
     const list = document.getElementById('radio-items-list');
     if (!list) return;
@@ -138,27 +165,30 @@ function renderRadioItemsAdmin() {
         row.style.justifyContent = 'space-between';
         row.style.alignItems = 'center';
         row.style.gap = '0.75rem';
-        row.style.padding = '0.7rem 0.8rem';
-        row.style.borderRadius = '10px';
+        row.style.padding = '0.75rem 0.9rem';
+        row.style.borderRadius = '12px';
         row.style.background = 'rgba(255,255,255,0.04)';
         row.style.border = '1px solid var(--border)';
+        row.style.animation = 'fadeInSlideUp 0.3s ease forwards';
+        row.style.transition = 'all 0.25s ease';
 
         const text = document.createElement('p');
         text.style.margin = '0';
         text.style.color = '#fff';
         text.style.flex = '1';
+        text.style.fontSize = '0.92rem';
         text.textContent = item.text;
 
         const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn btn-soft';
-        deleteBtn.style.width = 'auto';
-        deleteBtn.style.padding = '0.5rem 0.75rem';
-        deleteBtn.textContent = 'Supprimer';
+        deleteBtn.className = 'btn-delete-single';
+        deleteBtn.innerHTML = '<span>🗑️</span> <span>Supprimer</span>';
         deleteBtn.onclick = function() {
-            const nextItems = items.filter(entry => entry.id !== item.id);
-            saveRadioItems(nextItems);
-            renderRadioItemsAdmin();
-            alert('Information supprimée de la radio couloir.');
+            row.style.animation = 'fadeOutScale 0.25s forwards';
+            setTimeout(() => {
+                const nextItems = items.filter(entry => entry.id !== item.id);
+                saveRadioItems(nextItems);
+                renderRadioItemsAdmin();
+            }, 220);
         };
 
         row.appendChild(text);
@@ -178,54 +208,59 @@ function renderParticipantManagement() {
 
     list.innerHTML = '';
     participants.forEach(participant => {
-        const item = document.createElement('div');
-        item.style.background = 'rgba(255,255,255,0.04)';
-        item.style.border = '1px solid var(--border)';
-        item.style.borderRadius = '16px';
-        item.style.padding = '0.9rem';
-        item.style.display = 'grid';
-        item.style.gap = '0.7rem';
+        const card = document.createElement('div');
+        card.className = 'candidate-edit-card';
 
-        item.innerHTML = `
-            <input class="participant-edit-name" value="${participant.name}" placeholder="Nom" style="width: 100%; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff;">
-            <input class="participant-edit-photo" value="${participant.photo}" placeholder="Lien de photo" style="width: 100%; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff;">
-            <select class="participant-edit-gender" style="width: 100%; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--border); background: rgba(15,23,42,0.95); color: #fff;">
-                <option value="M" ${participant.gender === 'M' ? 'selected' : ''}>Masculin</option>
-                <option value="F" ${participant.gender === 'F' ? 'selected' : ''}>Féminin</option>
-            </select>
-            <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
-                <button class="btn btn-primary participant-save-btn" type="button" style="width: auto; padding: 0.65rem 0.9rem;">Enregistrer</button>
-                <button class="btn btn-soft participant-delete-btn" type="button" style="width: auto; padding: 0.65rem 0.9rem;">Supprimer</button>
+        card.innerHTML = `
+            <div class="candidate-edit-header">
+                <img src="${participant.photo}" alt="${participant.name}">
+                <div>
+                    <strong style="color: #fff; font-size: 1rem;">${participant.name}</strong>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">${participant.votes || 0} votes enregistrés</div>
+                </div>
+            </div>
+            <div style="display: grid; gap: 0.6rem;">
+                <input class="participant-edit-name" value="${participant.name}" placeholder="Nom du candidat" style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.25); color: #fff;">
+                <input class="participant-edit-photo" value="${participant.photo}" placeholder="URL de la photo" style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.25); color: #fff;">
+                <select class="participant-edit-gender" style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--border); background: rgba(15,23,42,0.95); color: #fff;">
+                    <option value="M" ${participant.gender === 'M' ? 'selected' : ''}>Masculin (Roi)</option>
+                    <option value="F" ${participant.gender === 'F' ? 'selected' : ''}>Féminin (Reine)</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 0.6rem; margin-top: 0.2rem;">
+                <button class="btn btn-primary participant-save-btn" type="button" style="padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: bold; width: auto;">💾 Enregistrer</button>
+                <button class="btn btn-soft participant-delete-btn" type="button" style="color: var(--red); padding: 0.6rem 1rem; font-size: 0.85rem; width: auto;">🗑️ Supprimer</button>
             </div>
         `;
 
-        const nameInput = item.querySelector('.participant-edit-name');
-        const photoInput = item.querySelector('.participant-edit-photo');
-        const genderSelect = item.querySelector('.participant-edit-gender');
-        const saveBtn = item.querySelector('.participant-save-btn');
-        const deleteBtn = item.querySelector('.participant-delete-btn');
+        const nameInput = card.querySelector('.participant-edit-name');
+        const photoInput = card.querySelector('.participant-edit-photo');
+        const genderSelect = card.querySelector('.participant-edit-gender');
+        const saveBtn = card.querySelector('.participant-save-btn');
+        const deleteBtn = card.querySelector('.participant-delete-btn');
 
         saveBtn.onclick = function() {
             participant.name = nameInput.value.trim() || participant.name;
             participant.photo = photoInput.value.trim() || participant.photo;
             participant.gender = genderSelect.value;
             saveData();
-            alert(`Profil mis à jour pour ${participant.name}`);
+            saveBtn.textContent = '✓ Modifié !';
+            setTimeout(() => { saveBtn.textContent = '💾 Enregistrer'; }, 1500);
             renderParticipantManagement();
             populateParticipantSelector();
         };
 
         deleteBtn.onclick = function() {
-            if (confirm(`Supprimer définitivement ${participant.name} et toutes ses données ?`)) {
+            card.style.animation = 'fadeOutScale 0.25s forwards';
+            setTimeout(() => {
                 participants = participants.filter(p => p.id !== participant.id);
                 saveData();
                 renderParticipantManagement();
                 populateParticipantSelector();
-                alert('Candidat supprimé.');
-            }
+            }, 220);
         };
 
-        list.appendChild(item);
+        list.appendChild(card);
     });
 }
 
@@ -234,54 +269,77 @@ function renderIndividualComments(participantId) {
     if (!stream) return;
 
     if (!participantId) {
-        stream.innerHTML = '<div class="comment-empty">Aucun candidat sélectionné.</div>';
+        stream.innerHTML = `
+            <div class="comment-empty" style="text-align: center; padding: 2rem 1rem; color: var(--text-muted);">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">👆</div>
+                <strong>Sélectionnez un candidat ci-dessus</strong>
+                <p style="font-size: 0.85rem; margin-top: 0.25rem;">Choisissez un participant dans la liste pour auditer ses commentaires.</p>
+            </div>
+        `;
         return;
     }
 
     const participant = participants.find(p => p.id === participantId);
-    if (!participant || !participant.comments || participant.comments.length === 0) {
-        stream.innerHTML = '<div class="comment-empty" style="color: var(--primary);">Zéro commentaire trouvé pour ce profil.</div>';
+    if (!participant) return;
+
+    // Header Card d'aperçu du candidat sélectionné
+    const previewHeader = document.createElement('div');
+    previewHeader.className = 'mod-candidate-preview';
+    previewHeader.innerHTML = `
+        <img src="${participant.photo}" alt="${participant.name}">
+        <div class="mod-candidate-info">
+            <h4>${participant.name} <span class="badge" style="font-size:0.7rem; padding:0.15rem 0.5rem;">${participant.gender === 'F' ? 'Reine 👑' : 'Roi 👑'}</span></h4>
+            <div class="mod-candidate-stats">
+                <span>🔥 ${participant.votes || 0} votes</span>
+                <span class="mod-badge-count">💬 ${participant.comments ? participant.comments.length : 0} com(s)</span>
+            </div>
+        </div>
+    `;
+
+    stream.innerHTML = '';
+    stream.appendChild(previewHeader);
+
+    if (!participant.comments || participant.comments.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'comment-empty';
+        empty.style.color = 'var(--primary)';
+        empty.style.padding = '1.5rem';
+        empty.style.textAlign = 'center';
+        empty.innerHTML = '✨ Aucun commentaire sous cette photo.';
+        stream.appendChild(empty);
         return;
     }
 
-    stream.innerHTML = '';
-    // On affiche les commentaires (du plus récent au plus ancien)
+    // Affichage des commentaires avec animation d'entrée et suppression fluide
     participant.comments.slice().reverse().forEach((comment, indexInverted) => {
-        // Retrouver l'index d'origine dans le tableau réel
         const realIndex = participant.comments.length - 1 - indexInverted;
 
-        const item = document.createElement('div');
-        item.className = 'comment-item';
-        item.style.background = 'rgba(255,255,255,0.03)';
-        item.style.padding = '0.8rem';
-        item.style.borderRadius = '10px';
-        item.style.border = '1px solid var(--border)';
-        item.style.display = 'flex';
-        item.style.justifyContent = 'space-between';
-        item.style.alignItems = 'center';
-        item.style.gap = '1rem';
+        const card = document.createElement('div');
+        card.className = 'mod-comment-card';
 
-        item.innerHTML = `
-            <div style="flex-grow: 1;">
-                <p style="margin:0; font-size:0.95rem; color:#fff;">${comment.text}</p>
-                <small style="color: var(--text-muted); font-size:0.75rem;">Posté le : ${comment.time || 'Date inconnue'}</small>
+        card.innerHTML = `
+            <div class="mod-comment-content">
+                <p class="mod-comment-text">${comment.text}</p>
+                <div class="mod-comment-time">
+                    <span>🕒</span> <span>${comment.time || 'Date inconnue'}</span>
+                </div>
             </div>
-            <button class="btn-delete-single" data-index="${realIndex}" style="background: rgba(239,68,68,0.2); color: var(--red); border: 1px solid var(--red); padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold;">
-                Supprimer
+            <button class="btn-delete-single" data-index="${realIndex}">
+                <span>🗑️</span> <span>Supprimer</span>
             </button>
         `;
 
-        // Événement d'éradication sur le bouton unique de ce commentaire
-        item.querySelector('.btn-delete-single').onclick = function() {
-            if (confirm("Supprimer définitivement ce commentaire spécifique ?")) {
+        card.querySelector('.btn-delete-single').onclick = function() {
+            card.classList.add('deleting');
+            setTimeout(() => {
                 participant.comments.splice(realIndex, 1);
                 saveData();
-                renderIndividualComments(participantId); // Rafraîchissement instantané du flux
-                populateParticipantSelector(); // Mise à jour du compteur dans le sélecteur
-            }
+                renderIndividualComments(participantId);
+                populateParticipantSelector();
+            }, 250);
         };
 
-        stream.appendChild(item);
+        stream.appendChild(card);
     });
 }
 

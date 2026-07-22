@@ -4,18 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gbai-Rai - Le Réseau du Campus</title>
-    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="CSS/common.css">
+    <link rel="stylesheet" href="CSS/index.css">
 </head>
 <body class="page-home">
-    <a href="home.html" class="back-link" aria-label="Retour en arrière" title="Retour en arrière">←</a>
-
     <!-- Barre de navigation du site -->
     <header class="site-header">
-        <div class="logo">Gbai<span>-</span>Rai</div>
+        <div class="logo-wrapper">
+            <a href="index.html" class="back-link" aria-label="Retour en arrière" title="Retour en arrière">←</a>
+            <div class="logo">Gbai<span>-</span>Rai</div>
+        </div>
         <nav class="site-nav">
             <a href="index.html" class="active">Accueil</a>
-            <a href="HTML/clash.html">Clashs</a>
-            <a href="HTML/classement.html">Classement</a>
+            <a href="clash.html">Clashs</a>
+            <a href="classement.html">Classement</a>
             <a href="#">Potins</a>
             <a href="#">Gazette</a>
         </nav>
@@ -59,7 +61,6 @@
                     <p id="radio-couloir-text">Chargement des infos...</p>
                     <div class="radio-footer">
                         <span id="radio-couloir-counter" class="radio-counter">0 / 0</span>
-                        <span class="radio-hint">Défilement automatique</span>
                     </div>
                 </div>
                 <div class="card-footer">

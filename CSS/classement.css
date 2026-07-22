@@ -1,0 +1,326 @@
+/* PAGE CLASSEMENT - LEADERBOARD STYLES */
+
+.duel-header {
+    margin-bottom: 2rem;
+}
+
+/* CARTE DU GAGNANT / REINE DU CAMPUS */
+.top-card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.queen-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.5rem 0;
+}
+
+.queen-card img {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    max-height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #facc15;
+    box-shadow: 0 0 15px rgba(250, 204, 21, 0.35);
+}
+
+.queen-card div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.queen-card h2 {
+    font-size: 1.25rem;
+    margin: 0;
+    color: var(--text-light);
+}
+
+.queen-card .badge {
+    display: inline-block;
+    width: fit-content;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.75rem;
+    background: rgba(250, 204, 21, 0.2);
+    color: #facc15;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+.queen-card p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+
+.top-five-wrapper,
+.leaderboard-wrapper {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* TOP 5 GRID */
+.top-five-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+.top-five-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0.75rem 1rem;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.top-five-item:hover {
+    transform: translateY(-2px);
+    background: rgba(56, 189, 248, 0.08);
+}
+
+.top-five-item img {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    max-height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--secondary);
+}
+
+.top-five-item h3 {
+    font-size: 0.95rem;
+    margin: 0;
+    color: var(--text-light);
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.top-five-item p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* LISTE DE CLASSEMENT GLOBAL (LEADERBOARD) */
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.leader-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0.65rem 1.1rem;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.leader-row:hover {
+    background: rgba(56, 189, 248, 0.08);
+    transform: translateX(4px);
+}
+
+.leader-row .rank {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    font-weight: 800;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.leader-row:nth-child(1) .rank {
+    background: #facc15;
+    color: #0f172a;
+}
+
+.leader-row:nth-child(2) .rank {
+    background: #94a3b8;
+    color: #0f172a;
+}
+
+.leader-row:nth-child(3) .rank {
+    background: #cd7f32;
+    color: #ffffff;
+}
+
+.leader-row img {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    max-height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1.5px solid var(--border);
+}
+
+.leader-row .info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 0.5rem;
+}
+
+.leader-row .info strong {
+    font-size: 0.98rem;
+    color: var(--text-light);
+}
+
+.leader-row .info .meta {
+    font-size: 0.82rem;
+    color: var(--secondary);
+    font-weight: 700;
+    background: rgba(56, 189, 248, 0.12);
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+/* ANCIENS PARTICIPANT-ROW (COMPATIBILITÉ) */
+.participant-row {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    padding: 0.65rem 1.1rem;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+}
+
+.participant-row:hover {
+    background: rgba(56, 189, 248, 0.08);
+}
+
+.participant-row img {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    max-height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* MODAL DE STATISTIQUES */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: grid;
+    place-items: center;
+    z-index: 200;
+    padding: 1.5rem;
+}
+
+.modal-card {
+    width: min(780px, 100%);
+    max-height: calc(100vh - 3rem);
+    overflow: auto;
+    background: rgba(15, 23, 42, 0.98);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 1.5rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.modal-close {
+    justify-self: end;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.modal-photo {
+    width: 54px;
+    height: 54px;
+    min-width: 54px;
+    max-height: 54px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.stats-card,
+.comments-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 18px;
+    padding: 1rem;
+}
+
+.comments-panel {
+    max-height: 260px;
+    overflow: auto;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.comments-panel h4,
+.comments-panel p {
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .top-five-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .leader-row {
+        padding: 0.6rem 0.85rem;
+    }
+}
