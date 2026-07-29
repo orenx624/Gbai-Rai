@@ -3,7 +3,7 @@
 // =======================================================================
 
 // URL de votre serveur Backend (Changez cette URL quand vous déploieriez sur Render)
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://gbai-rai-backend.onrender.com/api';
 
 const CONFIG = {
     CLASH_CONTENT_KEY: 'gbai_rai_clash_content',

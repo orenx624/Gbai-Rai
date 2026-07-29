@@ -4,7 +4,7 @@
 // Ce fichier ne contient que de la présentation et des appels API.
 // =======================================================================
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://gbai-rai-backend.onrender.com/api';
 
 // Clés localStorage pour l'état côté client uniquement (UI state, pas sécurité)
 const PAIR_INDEX_KEY   = 'gbai_rai_current_pair';
