@@ -21,19 +21,15 @@
 
     <main class="container">
         
+        <!-- SECTION AUTHENTIFICATION -->
         <section id="admin-gate" class="web-grid" style="grid-template-columns: 1fr; max-width: 500px; margin: 3rem auto;">
             <div class="card" style="border: 1px solid var(--purple); box-shadow: var(--shadow);">
                 <div class="card-header" style="text-align: center;">
                     <h1 style="color: var(--purple); font-size: 2rem;">🔒 Accès Restreint</h1>
-                    <p style="color: var(--text-muted);">Identifiez-vous pour contrôler l'application</p>
+                    <p style="color: var(--text-muted);">Identifiez-vous !!!</p>
                 </div>
                 
                 <div style="display: grid; gap: 1.2rem; padding: 1rem 0;">
-                    <div style="background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 0.85rem; font-size: 0.85rem; color: var(--text-light); text-align: center;">
-                        🔑 <strong>Identifiants de connexion :</strong><br>
-                        Identifiant : <code>admin</code> (ou <code>admin@orstore.com</code>)<br>
-                        Mot de passe : <code>admin</code>
-                    </div>
 
                     <div style="display: grid; gap: 0.4rem;">
                         <label style="font-size: 0.9rem; color: var(--text-light);">Adresse Email ou Identifiant Admin</label>
@@ -51,8 +47,10 @@
             </div>
         </section>
 
+        <!-- ESPACE DE TRAVAIL ADMINISTRATEUR -->
         <section id="admin-workspace" class="web-grid hidden" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-top: 2rem; gap: 2rem;">
             
+            <!-- MODÉRATION PAR PARTICIPANT -->
             <div class="card card-highlight" style="border-top: 4px solid var(--red);">
                 <div class="card-header">
                     <h2>💬 Modération Fine par Participant</h2>
@@ -60,29 +58,40 @@
                 </div>
                 <div style="display: grid; gap: 1rem; margin-top: 1rem;">
                     <select id="mod-participant-selector" style="width: 100%; padding: 0.8rem; background: rgba(15,23,42,0.95); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem;">
-                        </select>
+                    </select>
                     
                     <div id="mod-comments-stream" style="max-height: 400px; overflow-y: auto; display: grid; gap: 0.8rem; padding-right: 0.5rem;">
-                        </div>
+                    </div>
                 </div>
             </div>
 
+            <!-- RECRUTEMENT AVEC UPLOAD CLOUDINARY -->
             <div class="card" style="border-top: 4px solid var(--secondary);">
                 <div class="card-header">
                     <h2>🎯 Recrutement & Nouveaux Duels</h2>
-                    <p>Injectez de nouveaux candidats instantanément dans le flux de vote local.</p>
+                    <p>Injectez de nouveaux candidats instantanément dans le flux de vote.</p>
                 </div>
                 <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                    
                     <input id="new-candidate-name" type="text" placeholder="Nom ou Pseudonyme" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
-                    <input id="new-candidate-photo" type="url" placeholder="URL de la Photo (Unsplash, imgur...)" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                    
+                    <div style="display: grid; gap: 0.4rem;">
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">📷 Importer une image depuis votre appareil :</label>
+                        <input id="new-candidate-file" type="file" accept="image/*" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 0.85rem;">
+                    </div>
+
+                    <input id="new-candidate-photo" type="url" placeholder="Ou collez un lien URL d'image (Optionnel)" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                    
                     <select id="new-candidate-gender" style="width: 100%; padding: 0.8rem; background: rgba(15,23,42,0.95); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
                         <option value="M">Masculin (Roi)</option>
                         <option value="F">Féminin (Reine)</option>
                     </select>
-                    <button id="add-candidate-btn" class="btn btn-secondary" style="font-weight: bold; padding: 0.8rem;">Déployer le Candidat</button>
+
+                    <button id="add-candidate-btn" class="btn btn-secondary" style="font-weight: bold; padding: 0.8rem; cursor: pointer;">Déployer le Candidat</button>
                 </div>
             </div>
 
+            <!-- GESTION COMPLÈTE DES CANDIDATS -->
             <div class="card" style="border-top: 4px solid var(--red);">
                 <div class="card-header">
                     <h2>🛠️ Gestion complète des candidats</h2>
@@ -91,6 +100,7 @@
                 <div id="participant-management-list" style="display: grid; gap: 0.8rem; margin-top: 1rem;"></div>
             </div>
 
+            <!-- GESTION RADIO COULOIR -->
             <div class="card" style="border-top: 4px solid var(--secondary);">
                 <div class="card-header">
                     <h2>📢 Gestion Radio Couloir</h2>
@@ -103,6 +113,7 @@
                 </div>
             </div>
 
+            <!-- CONFIGURATION TEXTES PUBLICS -->
             <div class="card" style="border-top: 4px solid var(--primary);">
                 <div class="card-header">
                     <h2>⚙️ Configuration des Textes Publics</h2>

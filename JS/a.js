@@ -1,110 +1,33 @@
 // =======================================================================
-// EXPÉRIENCE UTILISATEUR PUBLIC (CLASH ET VOTES) - TOUT EN LOCALSTORAGE SHARED
+// EXPÉRIENCE UTILISATEUR PUBLIC — Gbai-Rai
+// Toute la logique de sécurité/validation est déléguée au backend.
+// Ce fichier ne contient que de la présentation et des appels API.
 // =======================================================================
 
-const STORAGE_KEY = 'gbai_rai_participants';
-const CLASH_CONTENT_KEY = 'gbai_rai_clash_content';
-const PAIR_INDEX_KEY = 'gbai_rai_current_pair';
-const VOTE_STATE_KEY = 'gbai_rai_voted_pairs';
-const RADIO_ITEMS_KEY = 'gbai_rai_radio_items';
+const API_BASE = 'http://localhost:5000/api';
 
-const defaultClashContent = {
-    title: 'Clash des photos',
-    description: 'Vote pour ta photo préférée et laisse un commentaire sous chacune des deux équipes.',
-    summaryLeftTitle: 'Comment ça marche ?',
-    summaryLeftText: 'Un seul vote par duel. Le bouton de l\'autre photo se désactive automatiquement.',
-    summaryRightTitle: 'Commentaires séparés',
-    summaryRightText: 'Chaque photo possède sa colonne dédiée pour garder les avis distincts et clashés.'
-};
-
-const defaultRadioItems = [
-    { id: 'radio-1', text: 'Un nouveau duel a été lancé au campus et tout le monde veut voter avant la fin de la journée.' },
-    { id: 'radio-2', text: 'Les rumeurs les plus chaudes circulent déjà dans les couloirs, et la radio couloir les relaye en temps réel.' }
-];
-
-const defaultParticipants = [
-    { id: 'p1', name: 'Amina', gender: 'F', photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] },
-    { id: 'p2', name: 'Moussa', gender: 'M', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] },
-    { id: 'p3', name: 'Seydou', gender: 'M', photo: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] },
-    { id: 'p4', name: 'Rita', gender: 'F', photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] },
-    { id: 'p5', name: 'Fabrice', gender: 'M', photo: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] },
-    { id: 'p6', name: 'Nadia', gender: 'F', photo: 'https://images.unsplash.com/photo-1507120410856-1f35574c3b45?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] },
-    { id: 'p7', name: 'David', gender: 'M', photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] },
-    { id: 'p8', name: 'Leila', gender: 'F', photo: 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] }
-];
+// Clés localStorage pour l'état côté client uniquement (UI state, pas sécurité)
+const PAIR_INDEX_KEY   = 'gbai_rai_current_pair';
+const VOTE_STATE_KEY   = 'gbai_rai_voted_pairs';
 
 const clashState = {
     participants: [],
     pairs: [],
     currentIndex: 0,
     voteState: {},
-    initialized: false
+    initialized: false,
 };
 
-const SERVER_URL = 'http://localhost:3000';
-let useServer = false;
-
-function getStoredData(key, fallback) {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    try { return JSON.parse(raw); } catch { return fallback; }
-}
-
-function setStoredData(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-}
-
-async function loadParticipants() {
-    if (useServer) {
-        try {
-            const res = await fetch(`${SERVER_URL}/participants`);
-            if (res.ok) return await res.json();
-        } catch (e) {
-            console.warn('Server unreachable, falling back to localStorage');
-            useServer = false;
-        }
-    }
-    const stored = getStoredData(STORAGE_KEY, null);
-    if (Array.isArray(stored) && stored.length) return stored;
-    setStoredData(STORAGE_KEY, defaultParticipants);
-    return [...defaultParticipants];
-}
-
-async function saveParticipants(participants) {
-    if (useServer) {
-        try { await fetch(`${SERVER_URL}/sync`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ participants }) }); } catch (e) { }
-    }
-    setStoredData(STORAGE_KEY, participants);
-}
-
-function loadClashContent() {
-    const stored = getStoredData(CLASH_CONTENT_KEY, null);
-    if (stored && typeof stored === 'object') return { ...defaultClashContent, ...stored };
-    return { ...defaultClashContent };
-}
-
-function loadVoteState() { return getStoredData(VOTE_STATE_KEY, {}); }
-function saveVoteState(state) { setStoredData(VOTE_STATE_KEY, state); }
-function loadRadioItems() {
-    const stored = getStoredData(RADIO_ITEMS_KEY, null);
-    if (Array.isArray(stored) && stored.length) return stored;
-    setStoredData(RADIO_ITEMS_KEY, defaultRadioItems);
-    return [...defaultRadioItems];
-}
-function saveRadioItems(items) { setStoredData(RADIO_ITEMS_KEY, items); }
-function getRadioDuration(text) {
-    const words = text.trim().split(/\s+/).filter(Boolean).length;
-    return Math.max(4000, words * 500);
-}
-function loadPairIndex() {
-    const index = parseInt(localStorage.getItem(PAIR_INDEX_KEY), 10);
-    return Number.isInteger(index) && index >= 0 ? index : 0;
-}
-function savePairIndex(index) { localStorage.setItem(PAIR_INDEX_KEY, String(index)); }
+// -----------------------------------------------------------------------
+// UTILITAIRES
+// -----------------------------------------------------------------------
+function loadVoteState()      { try { return JSON.parse(localStorage.getItem(VOTE_STATE_KEY)) || {}; } catch { return {}; } }
+function saveVoteState(state) { localStorage.setItem(VOTE_STATE_KEY, JSON.stringify(state)); }
+function loadPairIndex()      { const v = parseInt(localStorage.getItem(PAIR_INDEX_KEY), 10); return Number.isInteger(v) && v >= 0 ? v : 0; }
+function savePairIndex(i)     { localStorage.setItem(PAIR_INDEX_KEY, String(i)); }
 
 function formatTimestamp() {
-    const date = new Date();
-    return date.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    return new Date().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
 function createCommentItem(comment) {
@@ -115,129 +38,109 @@ function createCommentItem(comment) {
 }
 
 function renderText(id, text) {
-    const element = document.getElementById(id);
-    if (element) element.textContent = text;
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
 }
 
+// -----------------------------------------------------------------------
+// PAGE CLASH
+// -----------------------------------------------------------------------
 async function renderClashPage() {
-    clashState.participants = loadParticipants();
-    clashState.participants = await loadParticipants();
+    // Chargement des participants depuis le backend
+    try {
+        const res = await fetch(`${API_BASE}/participants`);
+        if (!res.ok) throw new Error('Erreur réseau');
+        clashState.participants = await res.json();
+    } catch (e) {
+        console.warn('Backend inaccessible, données indisponibles.');
+        clashState.participants = [];
+    }
+
+    // Génération des paires
     clashState.pairs = [];
-    
     for (let i = 0; i < clashState.participants.length; i += 2) {
         clashState.pairs.push({
-            left: clashState.participants[i],
-            right: clashState.participants[i + 1] || clashState.participants[0]
+            left:  clashState.participants[i],
+            right: clashState.participants[i + 1] || clashState.participants[0],
         });
     }
-    
+
     clashState.currentIndex = loadPairIndex();
-    clashState.voteState = loadVoteState();
-    const clashContent = loadClashContent();
+    clashState.voteState    = loadVoteState();
 
-    renderText('duel-title', clashContent.title);
-    renderText('duel-description', clashContent.description);
-    renderText('summary-left-title', clashContent.summaryLeftTitle);
-    renderText('summary-left-text', clashContent.summaryLeftText);
-    renderText('summary-right-title', clashContent.summaryRightTitle);
-    renderText('summary-right-text', clashContent.summaryRightText);
-
-    const leftCard = document.getElementById('photo-left');
-    const rightCard = document.getElementById('photo-right');
-    const leftComments = document.getElementById('comments-left');
-    const rightComments = document.getElementById('comments-right');
-    const leftBubble = document.getElementById('bubble-left');
+    // Références DOM
+    const leftCard    = document.getElementById('photo-left');
+    const rightCard   = document.getElementById('photo-right');
+    const leftInput   = document.getElementById('input-left');
+    const rightInput  = document.getElementById('input-right');
+    const leftBubble  = document.getElementById('bubble-left');
     const rightBubble = document.getElementById('bubble-right');
-    const leftInput = document.getElementById('input-left');
-    const rightInput = document.getElementById('input-right');
-    const leftName = document.getElementById('name-left');
-    const rightName = document.getElementById('name-right');
-    const leftVotes = document.getElementById('vote-left');
-    const rightVotes = document.getElementById('vote-right');
-    const leftPercent = document.getElementById('percent-left');
-    const rightPercent = document.getElementById('percent-right');
-    const leftVoteBtn = document.getElementById('vote-left-btn');
-    const rightVoteBtn = document.getElementById('vote-right-btn');
-    const leftCommentBtn = document.getElementById('comment-left-btn');
-    const rightCommentBtn = document.getElementById('comment-right-btn');
-    const viewLeftBtn = document.getElementById('view-comments-left-btn');
-    const viewRightBtn = document.getElementById('view-comments-right-btn');
-    const submitLeft = document.getElementById('submit-left');
-    const submitRight = document.getElementById('submit-right');
-    const cancelLeft = document.getElementById('cancel-left');
-    const cancelRight = document.getElementById('cancel-right');
-    const bottomCommentsViewer = document.getElementById('bottom-comments-viewer');
-    const bottomCommentsTitle = document.getElementById('bottom-comments-title');
-    const bottomCommentsSubtitle = document.getElementById('bottom-comments-subtitle');
-    const bottomCommentsList = document.getElementById('bottom-comments-list');
-    const closeBottom = document.getElementById('close-comments-viewer');
-    const nextDuelsBtn = document.getElementById('next-duel');
+    const bottomViewer    = document.getElementById('bottom-comments-viewer');
+    const bottomTitle     = document.getElementById('bottom-comments-title');
+    const bottomList      = document.getElementById('bottom-comments-list');
+    const closeBottom     = document.getElementById('close-comments-viewer');
+    const nextBtn         = document.getElementById('next-duel');
+
+    const el = id => document.getElementById(id);
 
     function renderCommentThread(participant, container) {
         if (!container) return;
         container.innerHTML = '';
-        if (!participant || !participant.comments || !participant.comments.length) {
+        if (!participant?.comments?.length) {
             const empty = document.createElement('div');
             empty.className = 'comment-empty';
             empty.textContent = 'Aucun commentaire pour le moment.';
             container.appendChild(empty);
             return;
         }
-        participant.comments.slice().reverse().forEach(comment => container.appendChild(createCommentItem(comment)));
+        participant.comments.slice().reverse().forEach(c => container.appendChild(createCommentItem(c)));
     }
 
     function renderPair(index) {
         const pair = clashState.pairs[index];
         if (!pair) return;
-        const totalVotes = pair.left.votes + pair.right.votes;
+        const total = (pair.left.votes || 0) + (pair.right.votes || 0);
 
-        if (leftCard) {
-            const leftImage = leftCard.querySelector('img');
-            if (leftImage) {
-                leftImage.src = pair.left.photo;
-                leftImage.alt = `Photo de ${pair.left.name}`;
-            }
-        }
-        if (rightCard) {
-            const rightImage = rightCard.querySelector('img');
-            if (rightImage) {
-                rightImage.src = pair.right.photo;
-                rightImage.alt = `Photo de ${pair.right.name}`;
-            }
-        }
+        // Images
+        const setImg = (card, participant) => {
+            const img = card?.querySelector('img');
+            if (img) { img.src = participant.photo; img.alt = `Photo de ${participant.name}`; }
+        };
+        setImg(leftCard, pair.left);
+        setImg(rightCard, pair.right);
 
-        if (leftName) leftName.textContent = pair.left.name;
-        if (rightName) rightName.textContent = pair.right.name;
-        if (leftVotes) leftVotes.textContent = `${pair.left.votes} votes`;
-        if (rightVotes) rightVotes.textContent = `${pair.right.votes} votes`;
-        if (leftPercent) leftPercent.textContent = `${totalVotes ? Math.round((pair.left.votes / totalVotes) * 100) : 0}%`;
-        if (rightPercent) rightPercent.textContent = `${totalVotes ? Math.round((pair.right.votes / totalVotes) * 100) : 0}%`;
+        // Noms, votes, pourcentages
+        renderText('name-left',     pair.left.name);
+        renderText('name-right',    pair.right.name);
+        renderText('vote-left',     `${pair.left.votes || 0} votes`);
+        renderText('vote-right',    `${pair.right.votes || 0} votes`);
+        renderText('percent-left',  `${total ? Math.round(((pair.left.votes || 0) / total) * 100) : 0}%`);
+        renderText('percent-right', `${total ? Math.round(((pair.right.votes || 0) / total) * 100) : 0}%`);
 
-        if (leftVoteBtn) leftVoteBtn.dataset.participantId = pair.left.id;
-        if (rightVoteBtn) rightVoteBtn.dataset.participantId = pair.right.id;
-        if (leftCommentBtn) leftCommentBtn.dataset.participantId = pair.left.id;
-        if (rightCommentBtn) rightCommentBtn.dataset.participantId = pair.right.id;
-        if (viewLeftBtn) viewLeftBtn.dataset.participantId = pair.left.id;
-        if (viewRightBtn) viewRightBtn.dataset.participantId = pair.right.id;
+        // Data attributes pour les boutons
+        ['vote-left-btn', 'comment-left-btn', 'view-comments-left-btn'].forEach(id => {
+            const btn = el(id); if (btn) btn.dataset.participantId = pair.left.id;
+        });
+        ['vote-right-btn', 'comment-right-btn', 'view-comments-right-btn'].forEach(id => {
+            const btn = el(id); if (btn) btn.dataset.participantId = pair.right.id;
+        });
 
-        renderCommentThread(pair.left, leftComments);
-        renderCommentThread(pair.right, rightComments);
+        renderCommentThread(pair.left,  document.getElementById('comments-left'));
+        renderCommentThread(pair.right, document.getElementById('comments-right'));
         updateVoteButtons(index);
     }
 
     function updateVoteButtons(pairIndex) {
         const selectedId = clashState.voteState[pairIndex];
-        const buttons = [leftVoteBtn, rightVoteBtn].filter(Boolean);
-        buttons.forEach(button => {
-            if (!button) return;
+        [el('vote-left-btn'), el('vote-right-btn')].filter(Boolean).forEach(btn => {
             if (selectedId) {
-                button.disabled = true;
-                button.classList.add('disabled');
-                button.textContent = button.dataset.participantId === selectedId ? 'Voté ✓' : 'Verrouillé';
+                btn.disabled = true;
+                btn.classList.add('disabled');
+                btn.textContent = btn.dataset.participantId === selectedId ? 'Voté ✓' : 'Verrouillé';
             } else {
-                button.disabled = false;
-                button.classList.remove('disabled');
-                button.textContent = 'Voter';
+                btn.disabled = false;
+                btn.classList.remove('disabled');
+                btn.textContent = 'Voter';
             }
         });
     }
@@ -255,127 +158,145 @@ async function renderClashPage() {
     }
 
     function closeBubble(side) {
-        if (side === 'left') leftBubble?.classList.add('hidden');
-        else rightBubble?.classList.add('hidden');
+        (side === 'left' ? leftBubble : rightBubble)?.classList.add('hidden');
     }
 
     function showBottomComments(participant) {
-        if (!bottomCommentsViewer || !bottomCommentsList) return;
-        bottomCommentsTitle.textContent = `Commentaires — ${participant.name}`;
-        bottomCommentsSubtitle.textContent = 'Derniers avis sous la photo.';
-        bottomCommentsList.innerHTML = '';
-        if (!participant.comments.length) {
+        if (!bottomViewer || !bottomList) return;
+        if (bottomTitle) bottomTitle.textContent = `Commentaires — ${participant.name}`;
+        bottomList.innerHTML = '';
+        if (!participant.comments?.length) {
             const empty = document.createElement('div');
             empty.className = 'comment-empty';
             empty.textContent = 'Aucun commentaire pour cette photo.';
-            bottomCommentsList.appendChild(empty);
+            bottomList.appendChild(empty);
         } else {
-            participant.comments.slice().reverse().forEach(comment => bottomCommentsList.appendChild(createCommentItem(comment)));
+            participant.comments.slice().reverse().forEach(c => bottomList.appendChild(createCommentItem(c)));
         }
-        bottomCommentsViewer.classList.remove('hidden');
+        bottomViewer.classList.remove('hidden');
     }
 
-    function addVote(participantId) {
-        if (clashState.voteState[clashState.currentIndex]) return;
-        const participant = clashState.participants.find(item => item.id === participantId);
-        if (!participant) return;
-        participant.votes += 1;
-        clashState.voteState[clashState.currentIndex] = participantId;
-        saveVoteState(clashState.voteState);
-        // persist to server when available
-        if (useServer) {
-            fetch(`${SERVER_URL}/vote`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ participantId }) }).catch(() => {
-                console.warn('Vote not sent to server');
-            }).then(() => renderPair(clashState.currentIndex));
-        } else {
-            saveParticipants(clashState.participants);
-            renderPair(clashState.currentIndex);
+    // VOTE → backend uniquement
+    async function addVote(participantId) {
+        if (clashState.voteState[clashState.currentIndex]) return; // déjà voté côté client
+
+        try {
+            const res = await fetch(`${API_BASE}/vote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ participantId }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                // Mise à jour locale du score après confirmation backend
+                const p = clashState.participants.find(item => item.id === participantId);
+                if (p) p.votes = data.votes;
+                clashState.voteState[clashState.currentIndex] = participantId;
+                saveVoteState(clashState.voteState);
+                renderPair(clashState.currentIndex);
+            }
+        } catch (e) {
+            console.warn('Vote non envoyé au serveur:', e);
         }
     }
 
-    function addComment(side) {
-        const partnerId = side === 'left' ? leftCommentBtn?.dataset.participantId : rightCommentBtn?.dataset.participantId;
-        const input = side === 'left' ? leftInput : rightInput;
-        const text = input?.value.trim();
+    // COMMENTAIRE → backend uniquement
+    async function addComment(side) {
+        const btnId  = side === 'left' ? 'comment-left-btn' : 'comment-right-btn';
+        const partnerId = el(btnId)?.dataset.participantId;
+        const input  = side === 'left' ? leftInput : rightInput;
+        const text   = input?.value.trim();
         if (!text || !partnerId) return;
-        const participant = clashState.participants.find(item => item.id === partnerId);
-        if (!participant) return;
-        const comment = { text, time: formatTimestamp() };
-        participant.comments.push(comment);
-        if (useServer) {
-            fetch(`${SERVER_URL}/comment`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ participantId: partnerId, text }) })
-                .catch(() => console.warn('Comment not sent to server'))
-                .then(() => {
-                    if (input) input.value = '';
-                    closeBubble(side);
-                    renderPair(clashState.currentIndex);
-                });
-        } else {
-            saveParticipants(clashState.participants);
-            if (input) input.value = '';
-            closeBubble(side);
-            renderPair(clashState.currentIndex);
+
+        try {
+            const res = await fetch(`${API_BASE}/comment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ participantId: partnerId, text }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                const p = clashState.participants.find(item => item.id === partnerId);
+                if (p) p.comments.push(data.comment);
+                if (input) input.value = '';
+                closeBubble(side);
+                renderPair(clashState.currentIndex);
+            }
+        } catch (e) {
+            console.warn('Commentaire non envoyé:', e);
         }
     }
 
     function goNext() {
         if (!clashState.pairs.length) return;
         const nextIndex = (clashState.currentIndex + 1) % clashState.pairs.length;
-        document.querySelector('.duel-content')?.classList.add('slide-left');
+        const duelContent = document.querySelector('.duel-content');
+        duelContent?.classList.add('slide-left');
         setTimeout(() => {
             clashState.currentIndex = nextIndex;
             savePairIndex(nextIndex);
             renderPair(nextIndex);
-            document.querySelector('.duel-content')?.classList.remove('slide-left');
-            document.querySelector('.duel-content')?.classList.add('slide-right');
-            setTimeout(() => document.querySelector('.duel-content')?.classList.remove('slide-right'), 300);
+            duelContent?.classList.remove('slide-left');
+            duelContent?.classList.add('slide-right');
+            setTimeout(() => duelContent?.classList.remove('slide-right'), 300);
         }, 250);
     }
 
     if (!clashState.initialized) {
-        leftVoteBtn?.addEventListener('click', () => addVote(leftVoteBtn.dataset.participantId));
-        rightVoteBtn?.addEventListener('click', () => addVote(rightVoteBtn.dataset.participantId));
-        leftCommentBtn?.addEventListener('click', () => toggleBubble('left'));
-        rightCommentBtn?.addEventListener('click', () => toggleBubble('right'));
-        viewLeftBtn?.addEventListener('click', () => {
+        el('vote-left-btn')?.addEventListener('click',  () => addVote(el('vote-left-btn').dataset.participantId));
+        el('vote-right-btn')?.addEventListener('click', () => addVote(el('vote-right-btn').dataset.participantId));
+        el('comment-left-btn')?.addEventListener('click',  () => toggleBubble('left'));
+        el('comment-right-btn')?.addEventListener('click', () => toggleBubble('right'));
+        el('view-comments-left-btn')?.addEventListener('click', () => {
             const pair = clashState.pairs[clashState.currentIndex];
             if (pair) showBottomComments(pair.left);
         });
-        viewRightBtn?.addEventListener('click', () => {
+        el('view-comments-right-btn')?.addEventListener('click', () => {
             const pair = clashState.pairs[clashState.currentIndex];
             if (pair) showBottomComments(pair.right);
         });
-        submitLeft?.addEventListener('click', () => addComment('left'));
-        submitRight?.addEventListener('click', () => addComment('right'));
-        cancelLeft?.addEventListener('click', () => closeBubble('left'));
-        cancelRight?.addEventListener('click', () => closeBubble('right'));
-        closeBottom?.addEventListener('click', () => bottomCommentsViewer?.classList.add('hidden'));
-        nextDuelsBtn?.addEventListener('click', goNext);
-        
-        // INTERCONNEXION MAGIQUE : Redirection directe vers la nouvelle page dédiée !
-        document.getElementById('admin-open')?.addEventListener('click', () => {
-            window.location.href = 'admin.html';
-        });
-
+        el('submit-left')?.addEventListener('click',  () => addComment('left'));
+        el('submit-right')?.addEventListener('click', () => addComment('right'));
+        el('cancel-left')?.addEventListener('click',  () => closeBubble('left'));
+        el('cancel-right')?.addEventListener('click', () => closeBubble('right'));
+        closeBottom?.addEventListener('click', () => bottomViewer?.classList.add('hidden'));
+        nextBtn?.addEventListener('click', goNext);
+        el('admin-open')?.addEventListener('click', () => { window.location.href = 'admin.html'; });
         clashState.initialized = true;
     }
 
     renderPair(clashState.currentIndex);
 }
 
+// -----------------------------------------------------------------------
+// RADIO COULOIR
+// -----------------------------------------------------------------------
 let radioCouloirTimer = null;
 let radioCouloirIndex = 0;
 let radioCouloirItems = [];
 
-function renderRadioCouloir() {
-    const textElement = document.getElementById('radio-couloir-text');
-    const counterElement = document.getElementById('radio-couloir-counter');
-    if (!textElement || !counterElement) return;
+function getRadioDuration(text) {
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(4000, words * 500);
+}
 
-    radioCouloirItems = loadRadioItems();
+async function renderRadioCouloir() {
+    const textEl    = document.getElementById('radio-couloir-text');
+    const counterEl = document.getElementById('radio-couloir-counter');
+    if (!textEl || !counterEl) return;
+
+    // Chargement depuis le backend
+    try {
+        const res = await fetch(`${API_BASE}/radio`);
+        if (res.ok) radioCouloirItems = await res.json();
+    } catch (e) {
+        // fallback : items vides
+        radioCouloirItems = [];
+    }
+
     if (!radioCouloirItems.length) {
-        textElement.textContent = 'Aucune information disponible pour l’instant.';
-        counterElement.textContent = '0 / 0';
+        textEl.textContent = 'Aucune information disponible pour l\'instant.';
+        counterEl.textContent = '0 / 0';
         return;
     }
 
@@ -383,110 +304,93 @@ function renderRadioCouloir() {
     const showItem = () => {
         const item = radioCouloirItems[radioCouloirIndex];
         if (!item) return;
-        textElement.textContent = item.text;
-        counterElement.textContent = `${radioCouloirIndex + 1} / ${radioCouloirItems.length}`;
+        textEl.textContent    = item.text;
+        counterEl.textContent = `${radioCouloirIndex + 1} / ${radioCouloirItems.length}`;
         if (radioCouloirTimer) clearTimeout(radioCouloirTimer);
         radioCouloirTimer = setTimeout(() => {
             radioCouloirIndex = (radioCouloirIndex + 1) % radioCouloirItems.length;
             showItem();
         }, getRadioDuration(item.text));
     };
-
     showItem();
 }
 
+// -----------------------------------------------------------------------
+// PAGE CLASSEMENT
+// -----------------------------------------------------------------------
 async function renderClassementPage() {
-    let data = null;
-    if (useServer) {
-        try {
-            const res = await fetch(`${SERVER_URL}/classement`);
-            if (res.ok) data = await res.json();
-        } catch (e) { useServer = false; }
-    }
-    if (!data) {
-        const parts = await loadParticipants();
-        const sorted = parts.slice().sort((a,b) => (b.votes||0) - (a.votes||0));
-        data = { top: sorted.slice(0,10), queen: sorted[0] || null };
-    }
+    try {
+        const res = await fetch(`${API_BASE}/classement`);
+        if (!res.ok) throw new Error('Erreur');
+        const data = await res.json();
 
-    const topParticipant = document.getElementById('top-participant');
-    const topFive = document.getElementById('top-five');
-    const leaderboardList = document.getElementById('leaderboard-list');
+        const topParticipant = document.getElementById('top-participant');
+        const topFive        = document.getElementById('top-five');
+        const leaderboard    = document.getElementById('leaderboard-list');
 
-    if (topParticipant) {
-        if (data.queen) {
-            topParticipant.innerHTML = `
-                <div class="queen-card">
-                    <img src="${data.queen.photo}" alt="${data.queen.name}">
-                    <div>
-                        <h2>${data.queen.name}</h2>
-                        <p class="badge">Reine du campus</p>
-                        <p>${data.queen.votes || 0} votes</p>
-                    </div>
-                </div>
-            `;
-        } else topParticipant.innerHTML = '<div class="comment-empty">Aucun participant.</div>';
-    }
+        if (topParticipant) {
+            topParticipant.innerHTML = data.queen
+                ? `<div class="queen-card">
+                       <img src="${data.queen.photo}" alt="${data.queen.name}">
+                       <div>
+                           <h2>${data.queen.name}</h2>
+                           <p class="badge">${data.queen.gender === 'F' ? 'Reine' : 'Roi'} du campus</p>
+                           <p>${data.queen.votes || 0} votes</p>
+                       </div>
+                   </div>`
+                : '<div class="comment-empty">Aucun participant.</div>';
+        }
 
-    if (topFive) {
-        topFive.innerHTML = '';
-        data.top.slice(0,5).forEach((p, i) => {
-            const el = document.createElement('div');
-            el.className = 'top-five-item';
-            el.innerHTML = `<img src="${p.photo}"><h3>${i+1}. ${p.name}</h3><p>${p.votes||0} votes</p>`;
-            topFive.appendChild(el);
-        });
-    }
+        if (topFive) {
+            topFive.innerHTML = '';
+            data.top.slice(0, 5).forEach((p, i) => {
+                const el = document.createElement('div');
+                el.className = 'top-five-item';
+                el.innerHTML = `<img src="${p.photo}"><h3>${i + 1}. ${p.name}</h3><p>${p.votes || 0} votes</p>`;
+                topFive.appendChild(el);
+            });
+        }
 
-    if (leaderboardList) {
-        leaderboardList.innerHTML = '';
-        data.top.forEach((p, idx) => {
-            const row = document.createElement('div');
-            row.className = 'leader-row';
-            row.innerHTML = `<div class="rank">${idx+1}</div><img src="${p.photo}"><div class="info"><strong>${p.name}</strong><div class="meta">${p.votes||0} votes</div></div>`;
-            leaderboardList.appendChild(row);
-        });
+        if (leaderboard) {
+            leaderboard.innerHTML = '';
+            data.top.forEach((p, idx) => {
+                const row = document.createElement('div');
+                row.className = 'leader-row';
+                row.innerHTML = `<div class="rank">${idx + 1}</div><img src="${p.photo}">
+                    <div class="info"><strong>${p.name}</strong><div class="meta">${p.votes || 0} votes</div></div>`;
+                leaderboard.appendChild(row);
+            });
+        }
+    } catch (e) {
+        console.warn('Classement inaccessible:', e);
     }
 }
 
+// -----------------------------------------------------------------------
+// COMPTEUR DE VUES (UI state uniquement)
+// -----------------------------------------------------------------------
 function updatePageViews() {
-    const viewCountElement = document.getElementById('view-count');
-    if (!viewCountElement) return;
-
-    const VIEW_COUNT_KEY = 'gbai_rai_view_count';
-    const SESSION_VISITED_KEY = 'gbai_rai_session_visited';
-
-    let views = parseInt(localStorage.getItem(VIEW_COUNT_KEY), 10);
-    if (isNaN(views) || views < 1420) {
-        views = 1420;
-    }
-
-    // Incrémenter le nombre réel de vues lors d'une nouvelle consultation de page
-    if (!sessionStorage.getItem(SESSION_VISITED_KEY)) {
+    const viewEl = document.getElementById('view-count');
+    if (!viewEl) return;
+    const VIEW_KEY    = 'gbai_rai_view_count';
+    const SESSION_KEY = 'gbai_rai_session_visited';
+    let views = parseInt(localStorage.getItem(VIEW_KEY), 10);
+    if (isNaN(views) || views < 1420) views = 1420;
+    if (!sessionStorage.getItem(SESSION_KEY)) {
         views += 1;
-        localStorage.setItem(VIEW_COUNT_KEY, String(views));
-        sessionStorage.setItem(SESSION_VISITED_KEY, 'true');
+        localStorage.setItem(VIEW_KEY, String(views));
+        sessionStorage.setItem(SESSION_KEY, 'true');
     }
-
-    viewCountElement.textContent = views.toLocaleString('fr-FR');
+    viewEl.textContent = views.toLocaleString('fr-FR');
 }
 
-function initApp() {
-    // Détecter si un serveur est disponible
-    (async () => {
-        try {
-            const res = await fetch(`${SERVER_URL}/participants`, { method: 'GET' });
-            if (res.ok) useServer = true;
-        } catch (e) {
-            useServer = false;
-        }
-        if (document.querySelector('.duel-content')) await renderClashPage();
-        if (document.getElementById('radio-couloir-text')) {
-            renderRadioCouloir();
-            updatePageViews();
-        }
-        if (document.querySelector('.page-classement') || document.getElementById('leaderboard-list')) await renderClassementPage();
-    })();
+// -----------------------------------------------------------------------
+// INITIALISATION
+// -----------------------------------------------------------------------
+async function initApp() {
+    if (document.querySelector('.duel-content'))       await renderClashPage();
+    if (document.getElementById('radio-couloir-text')) { await renderRadioCouloir(); updatePageViews(); }
+    if (document.getElementById('leaderboard-list'))   await renderClassementPage();
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

@@ -1,20 +1,15 @@
 // =======================================================================
-// CONSOLE D'ADMINISTRATION PROFESSIONNELLE POUR GBAI-RAI
+// CONSOLE D'ADMINISTRATION PROFESSIONNELLE POUR GBAI-RAI (AVEC BACKEND)
 // =======================================================================
 
+// URL de votre serveur Backend (Changez cette URL quand vous déploieriez sur Render)
+const API_URL = 'http://localhost:5000/api';
+
 const CONFIG = {
-    STORAGE_KEY: 'gbai_rai_participants',
     CLASH_CONTENT_KEY: 'gbai_rai_clash_content',
-    VOTE_STATE_KEY: 'gbai_rai_voted_pairs',
     CURRENT_ADMIN_KEY: 'gbai_rai_current_logged_admin',
     RADIO_ITEMS_KEY: 'gbai_rai_radio_items'
 };
-
-const defaultParticipants = [
-    { id: 'p1', name: 'Amina', gender: 'F', photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] },
-    { id: 'p2', name: 'Moussa', gender: 'M', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] },
-    { id: 'p3', name: 'Seydou', gender: 'M', photo: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=800&q=80', votes: 0, comments: [] }
-];
 
 const defaultRadioItems = [
     { id: 'radio-1', text: 'Un nouveau duel a été lancé au campus et tout le monde veut voter avant la fin de la journée.' },
@@ -33,10 +28,16 @@ const defaultClashContent = {
 let participants = [];
 let clashContent = {};
 
-// 1. CHARGEMENT INITIAL DES DONNÉES DE L'APPLICATION
-function loadData() {
-    const storedParticipants = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY));
-    participants = Array.isArray(storedParticipants) && storedParticipants.length ? storedParticipants : defaultParticipants;
+// 1. CHARGEMENT INITIAL DES DONNÉES DEPUIS LE BACKEND
+async function loadData() {
+    try {
+        // Récupération des participants depuis le Backend Node.js
+        const response = await fetch(`${API_URL}/participants`);
+        participants = await response.json();
+    } catch (error) {
+        console.error('Erreur de connexion au serveur Backend:', error);
+    }
+    
     clashContent = JSON.parse(localStorage.getItem(CONFIG.CLASH_CONTENT_KEY)) || {...defaultClashContent};
 }
 
@@ -49,8 +50,7 @@ function saveRadioItems(items) {
     localStorage.setItem(CONFIG.RADIO_ITEMS_KEY, JSON.stringify(items));
 }
 
-function saveData() {
-    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(participants));
+function saveLocalConfig() {
     localStorage.setItem(CONFIG.CLASH_CONTENT_KEY, JSON.stringify(clashContent));
 }
 
@@ -82,27 +82,34 @@ function setupGateLogin() {
 
     if (!loginBtn) return;
 
-    function handleLogin() {
+    async function handleLogin() {
         const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
         const pass = passInput ? passInput.value.trim() : '';
 
-        const validEmails = ['admin@orstore.com', 'admin', 'orphet@orstore.com', 'admin@gbai-rai.com', 'orphet'];
-        const validPasswords = ['admin', 'root', '1234', 'admin123'];
+        try {
+            // Vérification sécurisée auprès du Backend
+            const response = await fetch(`${API_URL}/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password: pass })
+            });
 
-        const isEmailValid = validEmails.includes(email) || email.startsWith('admin');
-        const isPassValid = validPasswords.includes(pass);
+            const data = await response.json();
 
-        if ((isEmailValid && isPassValid) || (email === "admin" && pass === "admin") || (pass === "admin")) {
-            if (errorDiv) errorDiv.classList.add('hidden');
-            localStorage.setItem(CONFIG.CURRENT_ADMIN_KEY, email || 'admin@orstore.com');
-            initSecurity();
-        } else {
-            if (errorDiv) {
-                errorDiv.textContent = "❌ Identifiants incorrects. (Identifiant: admin / Mot de passe: admin)";
-                errorDiv.classList.remove('hidden');
+            if (data.success) {
+                if (errorDiv) errorDiv.classList.add('hidden');
+                localStorage.setItem(CONFIG.CURRENT_ADMIN_KEY, email || 'admin@orstore.com');
+                initSecurity();
             } else {
-                alert("Échec d'authentification : Identifiants incorrects.");
+                if (errorDiv) {
+                    errorDiv.textContent = "❌ " + (data.message || "Identifiants incorrects.");
+                    errorDiv.classList.remove('hidden');
+                } else {
+                    alert("Échec d'authentification : Identifiants incorrects.");
+                }
             }
+        } catch (error) {
+            alert("Erreur : Impossible de contacter le serveur Backend.");
         }
     }
 
@@ -117,8 +124,9 @@ function setupGateLogin() {
     });
 }
 
-// 3. CODE DE GESTION DU TABLEAU DE BORD DYNAMIQUE
-function runConsoleDashboard() {
+// 3. TABLEAU DE BORD DYNAMIQUE
+async function runConsoleDashboard() {
+    await loadData();
     populateParticipantSelector();
     renderParticipantManagement();
     renderRadioItemsAdmin();
@@ -126,7 +134,6 @@ function runConsoleDashboard() {
     setupDashboardEvents();
 }
 
-// Remplir le sélecteur pour cibler la modération de commentaires
 function populateParticipantSelector() {
     const selector = document.getElementById('mod-participant-selector');
     if (!selector) return;
@@ -147,7 +154,6 @@ function populateParticipantSelector() {
     };
 }
 
-// Affichage chirurgical des commentaires avec animation d'entrée et suppression fluide
 function renderRadioItemsAdmin() {
     const list = document.getElementById('radio-items-list');
     if (!list) return;
@@ -243,21 +249,23 @@ function renderParticipantManagement() {
             participant.name = nameInput.value.trim() || participant.name;
             participant.photo = photoInput.value.trim() || participant.photo;
             participant.gender = genderSelect.value;
-            saveData();
             saveBtn.textContent = '✓ Modifié !';
             setTimeout(() => { saveBtn.textContent = '💾 Enregistrer'; }, 1500);
             renderParticipantManagement();
             populateParticipantSelector();
         };
 
-        deleteBtn.onclick = function() {
+        deleteBtn.onclick = async function() {
             card.style.animation = 'fadeOutScale 0.25s forwards';
-            setTimeout(() => {
-                participants = participants.filter(p => p.id !== participant.id);
-                saveData();
-                renderParticipantManagement();
-                populateParticipantSelector();
-            }, 220);
+            
+            // Suppression dans le Backend
+            await fetch(`${API_URL}/participants/${participant.id}`, {
+                method: 'DELETE'
+            });
+
+            await loadData();
+            renderParticipantManagement();
+            populateParticipantSelector();
         };
 
         list.appendChild(card);
@@ -282,7 +290,6 @@ function renderIndividualComments(participantId) {
     const participant = participants.find(p => p.id === participantId);
     if (!participant) return;
 
-    // Header Card d'aperçu du candidat sélectionné
     const previewHeader = document.createElement('div');
     previewHeader.className = 'mod-candidate-preview';
     previewHeader.innerHTML = `
@@ -310,7 +317,6 @@ function renderIndividualComments(participantId) {
         return;
     }
 
-    // Affichage des commentaires avec animation d'entrée et suppression fluide
     participant.comments.slice().reverse().forEach((comment, indexInverted) => {
         const realIndex = participant.comments.length - 1 - indexInverted;
 
@@ -333,7 +339,6 @@ function renderIndividualComments(participantId) {
             card.classList.add('deleting');
             setTimeout(() => {
                 participant.comments.splice(realIndex, 1);
-                saveData();
                 renderIndividualComments(participantId);
                 populateParticipantSelector();
             }, 250);
@@ -343,7 +348,6 @@ function renderIndividualComments(participantId) {
     });
 }
 
-// Pré-remplir les inputs d'édition de texte du site
 function prefillConfigurationFields() {
     if(document.getElementById('cfg-clash-title')) document.getElementById('cfg-clash-title').value = clashContent.title;
     if(document.getElementById('cfg-clash-desc')) document.getElementById('cfg-clash-desc').value = clashContent.description;
@@ -351,9 +355,7 @@ function prefillConfigurationFields() {
     if(document.getElementById('cfg-left-text')) document.getElementById('cfg-left-text').value = clashContent.summaryLeftText;
 }
 
-// Événements d'action (Enregistrements, modifications, ajouts)
 function setupDashboardEvents() {
-    // Bouton de déconnexion globale
     const logoutTop = document.getElementById('admin-logout-top');
     if (logoutTop) {
         logoutTop.onclick = function() {
@@ -362,10 +364,10 @@ function setupDashboardEvents() {
         };
     }
 
-    // Action : Déployer/Ajouter un nouveau candidat
+    // AJOUTER UN CANDIDAT (Envoi vers le Backend & Cloudinary)
     const addBtn = document.getElementById('add-candidate-btn');
     if (addBtn) {
-        addBtn.onclick = function() {
+        addBtn.onclick = async function() {
             const name = document.getElementById('new-candidate-name').value.trim();
             const photo = document.getElementById('new-candidate-photo').value.trim();
             const gender = document.getElementById('new-candidate-gender').value;
@@ -375,22 +377,31 @@ function setupDashboardEvents() {
                 return;
             }
 
-            const newId = 'p' + (Date.now()); // Génération d'ID unique par timestamp
-            participants.push({
-                id: newId,
-                name: name,
-                gender: gender,
-                photo: photo,
-                votes: 0,
-                comments: []
-            });
+            addBtn.textContent = 'Envoi en cours...';
 
-            saveData();
-            alert(`Succès : Le candidat "${name}" a été ajouté à la base de données.`);
-            document.getElementById('new-candidate-name').value = '';
-            document.getElementById('new-candidate-photo').value = '';
-            renderParticipantManagement();
-            populateParticipantSelector();
+            try {
+                // Envoi au Backend
+                const response = await fetch(`${API_URL}/participants`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, photo, gender })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`Succès : Le candidat "${name}" a été ajouté.`);
+                    document.getElementById('new-candidate-name').value = '';
+                    document.getElementById('new-candidate-photo').value = '';
+                    await loadData();
+                    renderParticipantManagement();
+                    populateParticipantSelector();
+                }
+            } catch (error) {
+                alert("Erreur lors de l'ajout sur le serveur.");
+            } finally {
+                addBtn.textContent = '➕ Ajouter le candidat';
+            }
         };
     }
 
@@ -412,7 +423,6 @@ function setupDashboardEvents() {
         };
     }
 
-    // Action : Sauvegarder les modifications de texte du site
     const saveCfgBtn = document.getElementById('save-cfg-btn');
     if (saveCfgBtn) {
         saveCfgBtn.onclick = function() {
@@ -421,40 +431,14 @@ function setupDashboardEvents() {
             clashContent.summaryLeftTitle = document.getElementById('cfg-left-title').value.trim() || defaultClashContent.summaryLeftTitle;
             clashContent.summaryLeftText = document.getElementById('cfg-left-text').value.trim() || defaultClashContent.summaryLeftText;
 
-            saveData();
-            alert("Les modifications de contenu ont été appliquées et enregistrées avec succès !");
-        };
-    }
-
-    // Nettoyages globaux (Options de secours)
-    const resetVotes = document.getElementById('global-reset-votes');
-    if (resetVotes) {
-        resetVotes.onclick = function() {
-            if (confirm("⚠️ Réinitialiser TOUS les compteurs de votes à zéro ?")) {
-                participants.forEach(p => p.votes = 0);
-                localStorage.setItem(CONFIG.VOTE_STATE_KEY, JSON.stringify({}));
-                saveData();
-                alert("Scores remis à zéro !");
-                location.reload();
-            }
-        };
-    }
-
-    const clearComments = document.getElementById('global-clear-comments');
-    if (clearComments) {
-        clearComments.onclick = function() {
-            if (confirm("⚠️ Supprimer intégralement TOUS les commentaires du site d'un coup ?")) {
-                participants.forEach(p => p.comments = []);
-                saveData();
-                alert("Base de commentaires nettoyée !");
-                location.reload();
-            }
+            saveLocalConfig();
+            alert("Les modifications de contenu ont été appliquées !");
         };
     }
 }
 
-// Initialisation dès chargement complet du script
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
+// Initialisation dès le chargement de la page
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadData();
     initSecurity();
 });
