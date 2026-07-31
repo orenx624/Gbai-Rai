@@ -21,6 +21,56 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
+.admin-workspace-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    align-items: stretch;
+}
+
+.admin-workspace-grid > .admin-panel-card,
+.admin-workspace-grid > .card {
+    flex: 1 1 calc(33.333% - 24px);
+    max-width: calc(33.333% - 24px);
+    min-width: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+.admin-workspace-grid > .admin-panel-card .card-header,
+.admin-workspace-grid > .card .card-header {
+    margin-bottom: 1rem;
+}
+
+.admin-workspace-grid > .admin-panel-card > div:last-child,
+.admin-workspace-grid > .card > div:last-child {
+    flex: 1;
+}
+
+@media (max-width: 1024px) {
+    .admin-workspace-grid > .admin-panel-card,
+    .admin-workspace-grid > .card {
+        flex: 1 1 calc(50% - 24px);
+        max-width: calc(50% - 24px);
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-workspace-grid {
+        gap: 16px;
+    }
+
+    .admin-workspace-grid > .admin-panel-card,
+    .admin-workspace-grid > .card {
+        flex: 1 1 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+}
+
 /* FORMULAIRES, INPUTS & TEXTAREAS */
 .admin-section input,
 .admin-section textarea,

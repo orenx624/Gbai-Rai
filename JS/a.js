@@ -3,7 +3,7 @@
 // Toute la logique de sécurité/validation est déléguée au backend.
 // Ce fichier ne contient que de la présentation et des appels API.
 // =======================================================================
-
+                                                                                                                                    
 const API_BASE = 'https://gbai-rai-backend.onrender.com/api';
 
 // Clés localStorage pour l'état côté client uniquement (UI state, pas sécurité)
