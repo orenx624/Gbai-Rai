@@ -5,10 +5,11 @@
 // =======================================================================
                                                                                                                                     
 const API_BASE = 'https://gbai-rai-backend.onrender.com/api';
+const PUBLIC_POLL_INTERVAL_MS = 5000;
 
-// Clés localStorage pour l'état côté client uniquement (UI state, pas sécurité)
-const PAIR_INDEX_KEY   = 'gbai_rai_current_pair';
-const VOTE_STATE_KEY   = 'gbai_rai_voted_pairs';
+let publicRefreshTimer = null;
+let publicRefreshInFlight = false;
+let viewCount = 1420;
 
 const clashState = {
     participants: [],
@@ -21,13 +22,35 @@ const clashState = {
 // -----------------------------------------------------------------------
 // UTILITAIRES
 // -----------------------------------------------------------------------
-function loadVoteState()      { try { return JSON.parse(localStorage.getItem(VOTE_STATE_KEY)) || {}; } catch { return {}; } }
-function saveVoteState(state) { localStorage.setItem(VOTE_STATE_KEY, JSON.stringify(state)); }
-function loadPairIndex()      { const v = parseInt(localStorage.getItem(PAIR_INDEX_KEY), 10); return Number.isInteger(v) && v >= 0 ? v : 0; }
-function savePairIndex(i)     { localStorage.setItem(PAIR_INDEX_KEY, String(i)); }
-
 function formatTimestamp() {
     return new Date().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function shuffleArray(items) {
+    const nextItems = [...items];
+    for (let index = nextItems.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [nextItems[index], nextItems[swapIndex]] = [nextItems[swapIndex], nextItems[index]];
+    }
+    return nextItems;
+}
+
+async function requestJsonWithFallback(paths, options = {}) {
+    const urls = paths.map(path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+    let lastError = null;
+
+    for (const url of urls) {
+        try {
+            const res = await fetch(url, options);
+            const text = await res.text();
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return text ? JSON.parse(text) : null;
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    throw lastError || new Error('Erreur API');
 }
 
 function createCommentItem(comment) {
@@ -42,31 +65,58 @@ function renderText(id, text) {
     if (el) el.textContent = text;
 }
 
+function buildRoundRobinPairs(participants) {
+    const pairs = [];
+    for (let i = 0; i < participants.length; i += 1) {
+        for (let j = i + 1; j < participants.length; j += 1) {
+            pairs.push({ left: participants[i], right: participants[j] });
+        }
+    }
+    return shuffleArray(pairs);
+}
+
+async function refreshPublicData() {
+    if (publicRefreshInFlight) return;
+    publicRefreshInFlight = true;
+
+    try {
+        if (document.querySelector('.duel-content')) await renderClashPage();
+        if (document.getElementById('radio-couloir-text')) await renderRadioCouloir();
+        if (document.getElementById('leaderboard-list')) await renderClassementPage();
+    } finally {
+        publicRefreshInFlight = false;
+    }
+}
+
+function startPublicPolling() {
+    if (publicRefreshTimer) clearInterval(publicRefreshTimer);
+    publicRefreshTimer = window.setInterval(() => {
+        refreshPublicData();
+    }, PUBLIC_POLL_INTERVAL_MS);
+}
+
 // -----------------------------------------------------------------------
 // PAGE CLASH
 // -----------------------------------------------------------------------
 async function renderClashPage() {
     // Chargement des participants depuis le backend
     try {
-        const res = await fetch(`${API_BASE}/participants`);
-        if (!res.ok) throw new Error('Erreur réseau');
-        clashState.participants = await res.json();
+        const data = await requestJsonWithFallback(['/participants']);
+        clashState.participants = Array.isArray(data) ? data : (data?.participants || []);
     } catch (e) {
-        console.warn('Backend inaccessible, données indisponibles.');
+        console.warn('Backend inaccessible, données indisponibles.', e);
         clashState.participants = [];
     }
 
-    // Génération des paires
-    clashState.pairs = [];
-    for (let i = 0; i < clashState.participants.length; i += 2) {
-        clashState.pairs.push({
-            left:  clashState.participants[i],
-            right: clashState.participants[i + 1] || clashState.participants[0],
-        });
-    }
+    // Génération des paires Round-Robin à partir des participants du backend
+    clashState.pairs = buildRoundRobinPairs(clashState.participants);
 
-    clashState.currentIndex = loadPairIndex();
-    clashState.voteState    = loadVoteState();
+    if (clashState.pairs.length) {
+        clashState.currentIndex = Math.min(clashState.currentIndex, clashState.pairs.length - 1);
+    } else {
+        clashState.currentIndex = 0;
+    }
+    clashState.voteState = {};
 
     // Références DOM
     const leftCard    = document.getElementById('photo-left');
@@ -178,21 +228,18 @@ async function renderClashPage() {
 
     // VOTE → backend uniquement
     async function addVote(participantId) {
-        if (clashState.voteState[clashState.currentIndex]) return; // déjà voté côté client
+        if (clashState.voteState[clashState.currentIndex]) return;
 
         try {
-            const res = await fetch(`${API_BASE}/vote`, {
+            const data = await requestJsonWithFallback(['/votes', '/vote'], {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ participantId }),
             });
-            const data = await res.json();
-            if (data.success) {
-                // Mise à jour locale du score après confirmation backend
+            if (data?.success !== false) {
                 const p = clashState.participants.find(item => item.id === participantId);
-                if (p) p.votes = data.votes;
+                if (p) p.votes = (p.votes || 0) + 1;
                 clashState.voteState[clashState.currentIndex] = participantId;
-                saveVoteState(clashState.voteState);
                 renderPair(clashState.currentIndex);
             }
         } catch (e) {
@@ -209,15 +256,14 @@ async function renderClashPage() {
         if (!text || !partnerId) return;
 
         try {
-            const res = await fetch(`${API_BASE}/comment`, {
+            const data = await requestJsonWithFallback(['/comments', '/comment'], {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ participantId: partnerId, text }),
             });
-            const data = await res.json();
-            if (data.success) {
+            if (data?.success) {
                 const p = clashState.participants.find(item => item.id === partnerId);
-                if (p) p.comments.push(data.comment);
+                if (p) p.comments = Array.isArray(p.comments) ? [...p.comments, data.comment] : [data.comment];
                 if (input) input.value = '';
                 closeBubble(side);
                 renderPair(clashState.currentIndex);
@@ -234,7 +280,6 @@ async function renderClashPage() {
         duelContent?.classList.add('slide-left');
         setTimeout(() => {
             clashState.currentIndex = nextIndex;
-            savePairIndex(nextIndex);
             renderPair(nextIndex);
             duelContent?.classList.remove('slide-left');
             duelContent?.classList.add('slide-right');
@@ -287,8 +332,8 @@ async function renderRadioCouloir() {
 
     // Chargement depuis le backend
     try {
-        const res = await fetch(`${API_BASE}/radio`);
-        if (res.ok) radioCouloirItems = await res.json();
+        const data = await requestJsonWithFallback(['/radio', '/radio/items']);
+        radioCouloirItems = Array.isArray(data) ? data : (data?.items || data?.radioItems || []);
     } catch (e) {
         // fallback : items vides
         radioCouloirItems = [];
@@ -320,9 +365,7 @@ async function renderRadioCouloir() {
 // -----------------------------------------------------------------------
 async function renderClassementPage() {
     try {
-        const res = await fetch(`${API_BASE}/classement`);
-        if (!res.ok) throw new Error('Erreur');
-        const data = await res.json();
+        const data = await requestJsonWithFallback(['/classement']);
 
         const topParticipant = document.getElementById('top-participant');
         const topFive        = document.getElementById('top-five');
@@ -372,16 +415,9 @@ async function renderClassementPage() {
 function updatePageViews() {
     const viewEl = document.getElementById('view-count');
     if (!viewEl) return;
-    const VIEW_KEY    = 'gbai_rai_view_count';
-    const SESSION_KEY = 'gbai_rai_session_visited';
-    let views = parseInt(localStorage.getItem(VIEW_KEY), 10);
-    if (isNaN(views) || views < 1420) views = 1420;
-    if (!sessionStorage.getItem(SESSION_KEY)) {
-        views += 1;
-        localStorage.setItem(VIEW_KEY, String(views));
-        sessionStorage.setItem(SESSION_KEY, 'true');
-    }
-    viewEl.textContent = views.toLocaleString('fr-FR');
+    viewCount = Math.max(viewCount, 1420);
+    viewCount += 1;
+    viewEl.textContent = viewCount.toLocaleString('fr-FR');
 }
 
 // -----------------------------------------------------------------------
@@ -391,6 +427,7 @@ async function initApp() {
     if (document.querySelector('.duel-content'))       await renderClashPage();
     if (document.getElementById('radio-couloir-text')) { await renderRadioCouloir(); updatePageViews(); }
     if (document.getElementById('leaderboard-list'))   await renderClassementPage();
+    if (!publicRefreshTimer) startPublicPolling();
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

@@ -6,9 +6,7 @@
 const API_URL = 'https://gbai-rai-backend.onrender.com/api';
 
 const CONFIG = {
-    CLASH_CONTENT_KEY: 'gbai_rai_clash_content',
-    CURRENT_ADMIN_KEY: 'gbai_rai_current_logged_admin',
-    RADIO_ITEMS_KEY: 'gbai_rai_radio_items'
+    CURRENT_ADMIN_KEY: 'gbai_rai_current_logged_admin'
 };
 
 const defaultRadioItems = [
@@ -26,32 +24,78 @@ const defaultClashContent = {
 };
 
 let participants = [];
-let clashContent = {};
+let clashContent = { ...defaultClashContent };
+
+async function requestJsonWithFallback(paths, options = {}) {
+    const urls = paths.map(path => `${API_URL}${path.startsWith('/') ? path : `/${path}`}`);
+    let lastError = null;
+
+    for (const url of urls) {
+        try {
+            const response = await fetch(url, options);
+            const text = await response.text();
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return text ? JSON.parse(text) : null;
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    throw lastError || new Error('Erreur API');
+}
 
 // 1. CHARGEMENT INITIAL DES DONNÉES DEPUIS LE BACKEND
 async function loadData() {
     try {
-        // Récupération des participants depuis le Backend Node.js
-        const response = await fetch(`${API_URL}/participants`);
-        participants = await response.json();
+        const payload = await requestJsonWithFallback(['/participants']);
+        participants = Array.isArray(payload) ? payload : (payload?.participants || []);
     } catch (error) {
         console.error('Erreur de connexion au serveur Backend:', error);
+        participants = [];
     }
-    
-    clashContent = JSON.parse(localStorage.getItem(CONFIG.CLASH_CONTENT_KEY)) || {...defaultClashContent};
+
+    try {
+        const payload = await requestJsonWithFallback(['/content', '/config']);
+        if (payload && typeof payload === 'object') {
+            clashContent = {
+                ...defaultClashContent,
+                ...payload,
+                title: payload.title || defaultClashContent.title,
+                description: payload.description || defaultClashContent.description,
+                summaryLeftTitle: payload.summaryLeftTitle || defaultClashContent.summaryLeftTitle,
+                summaryLeftText: payload.summaryLeftText || defaultClashContent.summaryLeftText
+            };
+        }
+    } catch (error) {
+        clashContent = { ...defaultClashContent };
+    }
 }
 
-function loadRadioItems() {
-    const stored = JSON.parse(localStorage.getItem(CONFIG.RADIO_ITEMS_KEY));
-    return Array.isArray(stored) && stored.length ? stored : defaultRadioItems;
+async function loadRadioItems() {
+    try {
+        const payload = await requestJsonWithFallback(['/radio', '/radio/items']);
+        return Array.isArray(payload) ? payload : (payload?.items || payload?.radioItems || []);
+    } catch (error) {
+        console.warn('Impossible de charger la radio depuis le backend:', error);
+        return [];
+    }
 }
 
-function saveRadioItems(items) {
-    localStorage.setItem(CONFIG.RADIO_ITEMS_KEY, JSON.stringify(items));
+async function saveRadioItems(items) {
+    const payload = await requestJsonWithFallback(['/radio', '/radio/items'], {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
+    });
+    return payload;
 }
 
-function saveLocalConfig() {
-    localStorage.setItem(CONFIG.CLASH_CONTENT_KEY, JSON.stringify(clashContent));
+async function saveLocalConfig() {
+    return requestJsonWithFallback(['/content', '/config'], {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(clashContent)
+    });
 }
 
 // 2. CONTRÔLE D'ACCÈS ET VÉRIFICATION DE SESSION
@@ -124,14 +168,37 @@ function setupGateLogin() {
     });
 }
 
+function updateAdminScrollIndicators() {
+    const cards = document.querySelectorAll('.admin-card-section');
+
+    cards.forEach(card => {
+        const maxScrollTop = Math.max(0, card.scrollHeight - card.clientHeight);
+        const progress = maxScrollTop > 0 ? Math.min(1, card.scrollTop / maxScrollTop) : 0;
+        card.style.setProperty('--scroll-progress', progress.toFixed(4));
+    });
+}
+
+function initAdminScrollIndicators() {
+    const cards = document.querySelectorAll('.admin-card-section');
+
+    cards.forEach(card => {
+        card.addEventListener('scroll', updateAdminScrollIndicators, { passive: true });
+        card.addEventListener('mouseenter', updateAdminScrollIndicators);
+    });
+
+    window.addEventListener('resize', updateAdminScrollIndicators);
+    updateAdminScrollIndicators();
+}
+
 // 3. TABLEAU DE BORD DYNAMIQUE
 async function runConsoleDashboard() {
     await loadData();
     populateParticipantSelector();
     renderParticipantManagement();
-    renderRadioItemsAdmin();
+    await renderRadioItemsAdmin();
     prefillConfigurationFields();
     setupDashboardEvents();
+    initAdminScrollIndicators();
 }
 
 function populateParticipantSelector() {
@@ -154,11 +221,11 @@ function populateParticipantSelector() {
     };
 }
 
-function renderRadioItemsAdmin() {
+async function renderRadioItemsAdmin() {
     const list = document.getElementById('radio-items-list');
     if (!list) return;
 
-    const items = loadRadioItems();
+    const items = await loadRadioItems();
     if (!items.length) {
         list.innerHTML = '<div class="comment-empty" style="color: var(--primary);">Aucune information pour la radio couloir.</div>';
         return;
@@ -188,12 +255,12 @@ function renderRadioItemsAdmin() {
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn-delete-single';
         deleteBtn.innerHTML = '<span>🗑️</span> <span>Supprimer</span>';
-        deleteBtn.onclick = function() {
+        deleteBtn.onclick = async function() {
             row.style.animation = 'fadeOutScale 0.25s forwards';
-            setTimeout(() => {
+            setTimeout(async () => {
                 const nextItems = items.filter(entry => entry.id !== item.id);
-                saveRadioItems(nextItems);
-                renderRadioItemsAdmin();
+                await saveRadioItems(nextItems);
+                await renderRadioItemsAdmin();
             }, 220);
         };
 
@@ -245,27 +312,41 @@ function renderParticipantManagement() {
         const saveBtn = card.querySelector('.participant-save-btn');
         const deleteBtn = card.querySelector('.participant-delete-btn');
 
-        saveBtn.onclick = function() {
-            participant.name = nameInput.value.trim() || participant.name;
-            participant.photo = photoInput.value.trim() || participant.photo;
-            participant.gender = genderSelect.value;
-            saveBtn.textContent = '✓ Modifié !';
-            setTimeout(() => { saveBtn.textContent = '💾 Enregistrer'; }, 1500);
-            renderParticipantManagement();
-            populateParticipantSelector();
+        saveBtn.onclick = async function() {
+            try {
+                await requestJsonWithFallback([`/participants/${participant.id}`], {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: nameInput.value.trim() || participant.name,
+                        photo: photoInput.value.trim() || participant.photo,
+                        gender: genderSelect.value
+                    })
+                });
+                saveBtn.textContent = '✓ Modifié !';
+                setTimeout(() => { saveBtn.textContent = '💾 Enregistrer'; }, 1500);
+                await loadData();
+                renderParticipantManagement();
+                populateParticipantSelector();
+            } catch (error) {
+                console.error('Échec de la mise à jour du candidat:', error);
+                alert('Échec de la mise à jour du candidat.');
+            }
         };
 
         deleteBtn.onclick = async function() {
             card.style.animation = 'fadeOutScale 0.25s forwards';
-            
-            // Suppression dans le Backend
-            await fetch(`${API_URL}/participants/${participant.id}`, {
-                method: 'DELETE'
-            });
-
-            await loadData();
-            renderParticipantManagement();
-            populateParticipantSelector();
+            try {
+                await requestJsonWithFallback([`/participants/${participant.id}`], {
+                    method: 'DELETE'
+                });
+                await loadData();
+                renderParticipantManagement();
+                populateParticipantSelector();
+            } catch (error) {
+                console.error('Échec de la suppression du candidat:', error);
+                alert('Échec de la suppression du candidat.');
+            }
         };
 
         list.appendChild(card);
@@ -335,13 +416,20 @@ function renderIndividualComments(participantId) {
             </button>
         `;
 
-        card.querySelector('.btn-delete-single').onclick = function() {
+        card.querySelector('.btn-delete-single').onclick = async function() {
             card.classList.add('deleting');
-            setTimeout(() => {
-                participant.comments.splice(realIndex, 1);
+            const commentId = comment.id || realIndex;
+            try {
+                await requestJsonWithFallback([`/participants/${participantId}/comments/${commentId}`], {
+                    method: 'DELETE'
+                });
+                await loadData();
                 renderIndividualComments(participantId);
                 populateParticipantSelector();
-            }, 250);
+            } catch (error) {
+                console.error('Échec de la suppression du commentaire:', error);
+                alert('Échec de la suppression du commentaire.');
+            }
         };
 
         stream.appendChild(card);
@@ -364,23 +452,34 @@ function setupDashboardEvents() {
         };
     }
 
-    // AJOUTER UN CANDIDAT (Envoi vers le Backend & Cloudinary)
+    // AJOUTER UN CANDIDAT (Envoi vers le Backend via HTTP)
     const addBtn = document.getElementById('add-candidate-btn');
     if (addBtn) {
         addBtn.onclick = async function() {
             const name = document.getElementById('new-candidate-name').value.trim();
-            const photo = document.getElementById('new-candidate-photo').value.trim();
+            const photoInputValue = document.getElementById('new-candidate-photo').value.trim();
             const gender = document.getElementById('new-candidate-gender').value;
+            const fileInput = document.getElementById('new-candidate-file');
+            const selectedFile = fileInput?.files?.[0];
 
-            if (!name || !photo) {
-                alert("Erreur : Veuillez attribuer un nom et un lien d'image valide.");
+            if (!name || (!photoInputValue && !selectedFile)) {
+                alert("Erreur : Veuillez attribuer un nom et une image valide (URL ou fichier)." );
                 return;
             }
 
             addBtn.textContent = 'Envoi en cours...';
 
             try {
-                // Envoi au Backend
+                let photo = photoInputValue;
+                if (selectedFile) {
+                    photo = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = () => reject(new Error('Impossible de lire le fichier sélectionné.'));
+                        reader.readAsDataURL(selectedFile);
+                    });
+                }
+
                 const response = await fetch(`${API_URL}/participants`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -393,6 +492,7 @@ function setupDashboardEvents() {
                     alert(`Succès : Le candidat "${name}" a été ajouté.`);
                     document.getElementById('new-candidate-name').value = '';
                     document.getElementById('new-candidate-photo').value = '';
+                    if (fileInput) fileInput.value = '';
                     await loadData();
                     renderParticipantManagement();
                     populateParticipantSelector();
@@ -407,32 +507,37 @@ function setupDashboardEvents() {
 
     const addRadioItemBtn = document.getElementById('add-radio-item-btn');
     if (addRadioItemBtn) {
-        addRadioItemBtn.onclick = function() {
+        addRadioItemBtn.onclick = async function() {
             const textInput = document.getElementById('new-radio-item-text');
             const text = textInput?.value.trim();
             if (!text) {
                 alert('Veuillez saisir une information avant de l’ajouter à la radio couloir.');
                 return;
             }
-            const items = loadRadioItems();
-            items.push({ id: 'radio-' + Date.now(), text });
-            saveRadioItems(items);
+            const items = await loadRadioItems();
+            const nextItems = [...items, { id: 'radio-' + Date.now(), text }];
+            await saveRadioItems(nextItems);
             textInput.value = '';
-            renderRadioItemsAdmin();
+            await renderRadioItemsAdmin();
             alert('Information ajoutée à la radio couloir.');
         };
     }
 
     const saveCfgBtn = document.getElementById('save-cfg-btn');
     if (saveCfgBtn) {
-        saveCfgBtn.onclick = function() {
+        saveCfgBtn.onclick = async function() {
             clashContent.title = document.getElementById('cfg-clash-title').value.trim() || defaultClashContent.title;
             clashContent.description = document.getElementById('cfg-clash-desc').value.trim() || defaultClashContent.description;
             clashContent.summaryLeftTitle = document.getElementById('cfg-left-title').value.trim() || defaultClashContent.summaryLeftTitle;
             clashContent.summaryLeftText = document.getElementById('cfg-left-text').value.trim() || defaultClashContent.summaryLeftText;
 
-            saveLocalConfig();
-            alert("Les modifications de contenu ont été appliquées !");
+            try {
+                await saveLocalConfig();
+                alert("Les modifications de contenu ont été appliquées !");
+            } catch (error) {
+                console.error('Échec de sauvegarde du contenu:', error);
+                alert('Échec de la sauvegarde du contenu.');
+            }
         };
     }
 }

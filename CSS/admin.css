@@ -21,7 +21,8 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
-.admin-workspace-grid {
+.admin-workspace-grid,
+.admin-dashboard-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -30,44 +31,91 @@
 }
 
 .admin-workspace-grid > .admin-panel-card,
-.admin-workspace-grid > .card {
-    flex: 1 1 calc(33.333% - 24px);
+.admin-workspace-grid > .card,
+.admin-dashboard-container > .admin-card-section,
+.admin-dashboard-container > .card {
+    flex: 0 0 calc(33.333% - 24px);
     max-width: calc(33.333% - 24px);
-    min-width: 320px;
+    min-width: 300px;
+    height: 520px;
+    overflow-y: auto;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    height: 100%;
+}
+
+.admin-card-section {
+    position: relative;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.admin-card-section::-webkit-scrollbar {
+    display: none;
+}
+
+.admin-card-section::before,
+.admin-card-section::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: calc(var(--scroll-progress, 0) * 100%);
+    background: linear-gradient(180deg, rgba(0, 212, 255, 0.95), rgba(0, 212, 255, 0.2));
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+    border-radius: 999px;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.admin-card-section::before {
+    left: 10px;
+}
+
+.admin-card-section::after {
+    right: 10px;
 }
 
 .admin-workspace-grid > .admin-panel-card .card-header,
-.admin-workspace-grid > .card .card-header {
+.admin-workspace-grid > .card .card-header,
+.admin-dashboard-container > .admin-card-section .card-header,
+.admin-dashboard-container > .card .card-header {
     margin-bottom: 1rem;
 }
 
 .admin-workspace-grid > .admin-panel-card > div:last-child,
-.admin-workspace-grid > .card > div:last-child {
+.admin-workspace-grid > .card > div:last-child,
+.admin-dashboard-container > .admin-card-section > div:last-child,
+.admin-dashboard-container > .card > div:last-child {
     flex: 1;
 }
 
 @media (max-width: 1024px) {
     .admin-workspace-grid > .admin-panel-card,
-    .admin-workspace-grid > .card {
-        flex: 1 1 calc(50% - 24px);
+    .admin-workspace-grid > .card,
+    .admin-dashboard-container > .admin-card-section,
+    .admin-dashboard-container > .card {
+        flex: 0 0 calc(50% - 24px);
         max-width: calc(50% - 24px);
     }
 }
 
 @media (max-width: 640px) {
-    .admin-workspace-grid {
+    .admin-workspace-grid,
+    .admin-dashboard-container {
         gap: 16px;
     }
 
     .admin-workspace-grid > .admin-panel-card,
-    .admin-workspace-grid > .card {
-        flex: 1 1 100%;
+    .admin-workspace-grid > .card,
+    .admin-dashboard-container > .admin-card-section,
+    .admin-dashboard-container > .card {
+        flex: 0 0 100%;
         max-width: 100%;
         min-width: 0;
+        height: auto;
+        max-height: 520px;
     }
 }
 
