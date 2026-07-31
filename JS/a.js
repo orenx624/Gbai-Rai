@@ -4,7 +4,7 @@
 // Ce fichier ne contient que de la présentation et des appels API.
 // =======================================================================
                                                                                                                                     
-const API_BASE = 'https://gbai-rai-backend.onrender.com/api';
+const API_BASE = (window.__API_BASE__ || '/api').replace(/\/$/, '');
 const PUBLIC_POLL_INTERVAL_MS = 5000;
 
 let publicRefreshTimer = null;

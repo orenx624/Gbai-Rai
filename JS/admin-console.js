@@ -2,8 +2,8 @@
 // CONSOLE D'ADMINISTRATION PROFESSIONNELLE POUR GBAI-RAI (AVEC BACKEND)
 // =======================================================================
 
-// URL de votre serveur Backend (Changez cette URL quand vous déploieriez sur Render)
-const API_URL = 'https://gbai-rai-backend.onrender.com/api';
+// URL du backend configurable via window.__API_BASE__ ou /api par défaut.
+const API_URL = (window.__API_BASE__ || '/api').replace(/\/$/, '');
 
 const CONFIG = {
     CURRENT_ADMIN_KEY: 'gbai_rai_current_logged_admin'
