@@ -5,10 +5,6 @@
 // =======================================================================
                                                                                                                                     
 const API_BASE = 'https://gbai-rai-backend-x.vercel.app/api';
-const PUBLIC_POLL_INTERVAL_MS = 6000;
-
-let publicRefreshTimer = null;
-let publicRefreshInFlight = false;
 let viewCount = 1420;
 
 const clashState = {
@@ -63,26 +59,6 @@ function buildRoundRobinPairs(participants) {
         }
     }
     return shuffleArray(pairs);
-}
-
-async function refreshPublicData() {
-    if (publicRefreshInFlight) return;
-    publicRefreshInFlight = true;
-
-    try {
-        if (document.querySelector('.duel-content')) await renderClashPage();
-        if (document.getElementById('radio-couloir-text')) await renderRadioCouloir();
-        if (document.getElementById('leaderboard-list')) await renderClassementPage();
-    } finally {
-        publicRefreshInFlight = false;
-    }
-}
-
-function startPublicPolling() {
-    if (publicRefreshTimer) clearInterval(publicRefreshTimer);
-    publicRefreshTimer = window.setInterval(() => {
-        refreshPublicData();
-    }, PUBLIC_POLL_INTERVAL_MS);
 }
 
 // -----------------------------------------------------------------------
@@ -266,15 +242,8 @@ async function renderClashPage() {
     function goNext() {
         if (!clashState.pairs.length) return;
         const nextIndex = (clashState.currentIndex + 1) % clashState.pairs.length;
-        const duelContent = document.querySelector('.duel-content');
-        duelContent?.classList.add('slide-left');
-        setTimeout(() => {
-            clashState.currentIndex = nextIndex;
-            renderPair(nextIndex);
-            duelContent?.classList.remove('slide-left');
-            duelContent?.classList.add('slide-right');
-            setTimeout(() => duelContent?.classList.remove('slide-right'), 300);
-        }, 250);
+        clashState.currentIndex = nextIndex;
+        renderPair(nextIndex);
     }
 
     if (!clashState.initialized) {
@@ -417,7 +386,6 @@ async function initApp() {
     if (document.querySelector('.duel-content'))       await renderClashPage();
     if (document.getElementById('radio-couloir-text')) { await renderRadioCouloir(); updatePageViews(); }
     if (document.getElementById('leaderboard-list'))   await renderClassementPage();
-    if (!publicRefreshTimer) startPublicPolling();
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
