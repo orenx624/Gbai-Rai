@@ -29,21 +29,21 @@
                     <p style="color: var(--text-muted);">Identifiez-vous !!!</p>
                 </div>
                 
-                <div style="display: grid; gap: 1.2rem; padding: 1rem 0;">
+                <form id="admin-login-form" autocomplete="off" novalidate style="display: grid; gap: 1.2rem; padding: 1rem 0;">
 
                     <div style="display: grid; gap: 0.4rem;">
                         <label style="font-size: 0.9rem; color: var(--text-light);">Adresse Email ou Identifiant Admin</label>
-                        <input id="gate-email" type="text" placeholder="admin" value="admin" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                        <input id="gate-email" name="email" type="text" placeholder="admin" autocomplete="username" autocapitalize="off" spellcheck="false" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
                     </div>
                     <div style="display: grid; gap: 0.4rem;">
                         <label style="font-size: 0.9rem; color: var(--text-light);">Mot de passe secret</label>
-                        <input id="gate-password" type="password" placeholder="••••••••" value="admin" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
+                        <input id="gate-password" name="password" type="password" placeholder="••••••••" autocomplete="new-password" autocapitalize="off" spellcheck="false" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff;">
                     </div>
                     
                     <div id="gate-error" class="hidden" style="color: var(--red); font-size: 0.88rem; text-align: center; font-weight: bold; background: rgba(239,68,68,0.15); padding: 0.5rem; border-radius: 6px;"></div>
 
-                    <button id="gate-login-btn" class="btn btn-primary" style="background: var(--purple); border: none; padding: 0.9rem; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 0.5rem;">S'authentifier à la Console</button>
-                </div>
+                    <button id="gate-login-btn" type="submit" class="btn btn-primary" style="background: var(--purple); border: none; padding: 0.9rem; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 0.5rem;">S'authentifier à la Console</button>
+                </form>
             </div>
         </section>
 

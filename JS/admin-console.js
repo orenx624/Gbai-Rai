@@ -4,6 +4,7 @@
 
 // URL du backend Vercel.
 const API_URL = 'https://gbai-rai-backend-x.vercel.app/api';
+const ADMIN_SESSION_STORAGE_KEY = 'gbai_admin_session_token';
 
 const defaultClashContent = {
     title: 'Clash des photos',
@@ -16,6 +17,68 @@ const defaultClashContent = {
 
 let participants = [];
 let clashContent = { ...defaultClashContent };
+let adminSession = { isAuthenticated: false, token: null };
+
+function getStoredAdminToken() {
+    try {
+        return localStorage.getItem(ADMIN_SESSION_STORAGE_KEY) || '';
+    } catch (error) {
+        console.warn('Impossible d’accéder au stockage local:', error);
+        return '';
+    }
+}
+
+function persistAdminToken(token) {
+    try {
+        if (token) {
+            localStorage.setItem(ADMIN_SESSION_STORAGE_KEY, token);
+        } else {
+            localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
+        }
+    } catch (error) {
+        console.warn('Impossible de persister le jeton d’authentification:', error);
+    }
+}
+
+function clearAdminForm() {
+    const emailInput = document.getElementById('gate-email');
+    const passInput = document.getElementById('gate-password');
+    const errorDiv = document.getElementById('gate-error');
+
+    if (emailInput) emailInput.value = '';
+    if (passInput) passInput.value = '';
+    if (errorDiv) {
+        errorDiv.textContent = '';
+        errorDiv.classList.add('hidden');
+    }
+}
+
+function showAdminGate() {
+    const gate = document.getElementById('admin-gate');
+    const workspace = document.getElementById('admin-workspace');
+    const logoutBtn = document.getElementById('admin-logout-top');
+
+    if (gate) gate.classList.remove('hidden');
+    if (workspace) workspace.classList.add('hidden');
+    if (logoutBtn) logoutBtn.classList.add('hidden');
+    clearAdminForm();
+}
+
+function showAdminWorkspace() {
+    const gate = document.getElementById('admin-gate');
+    const workspace = document.getElementById('admin-workspace');
+    const logoutBtn = document.getElementById('admin-logout-top');
+
+    if (gate) gate.classList.add('hidden');
+    if (workspace) workspace.classList.remove('hidden');
+    if (logoutBtn) logoutBtn.classList.remove('hidden');
+}
+
+function resetAdminAuthState() {
+    adminSession = { isAuthenticated: false, token: null };
+    persistAdminToken('');
+    showAdminGate();
+}
 
 async function requestJson(path, options = {}) {
     const url = `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
@@ -80,61 +143,123 @@ async function saveLocalConfig() {
 }
 
 // 2. CONTRÔLE D'ACCÈS ET VÉRIFICATION DE SESSION
-function initSecurity() {
-    const gate = document.getElementById('admin-gate');
-    const workspace = document.getElementById('admin-workspace');
-    const logoutBtn = document.getElementById('admin-logout-top');
+async function validateStoredSession() {
+    const token = getStoredAdminToken();
+    if (!token) {
+        resetAdminAuthState();
+        return false;
+    }
 
-    if (gate) gate.classList.add('hidden');
-    if (workspace) workspace.classList.remove('hidden');
-    if (logoutBtn) logoutBtn.classList.remove('hidden');
-    runConsoleDashboard();
+    try {
+        const response = await fetch(`${API_URL}/admin/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok && data?.success !== false) {
+            adminSession = { isAuthenticated: true, token };
+            showAdminWorkspace();
+            await runConsoleDashboard();
+            return true;
+        }
+    } catch (error) {
+        console.warn('Échec de validation de session backend:', error);
+    }
+
+    persistAdminToken('');
+    resetAdminAuthState();
+    return false;
+}
+
+function initSecurity() {
+    resetAdminAuthState();
 }
 
 function setupGateLogin() {
     const loginBtn = document.getElementById('gate-login-btn');
+    const loginForm = document.getElementById('admin-login-form');
     const emailInput = document.getElementById('gate-email');
     const passInput = document.getElementById('gate-password');
     const errorDiv = document.getElementById('gate-error');
 
-    if (!loginBtn) return;
+    if (!loginBtn || !loginForm) return;
 
-    async function handleLogin() {
+    async function handleLogin(event) {
+        if (event) event.preventDefault();
+
         const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
         const pass = passInput ? passInput.value.trim() : '';
 
+        if (!email || !pass) {
+            if (errorDiv) {
+                errorDiv.textContent = '❌ Veuillez saisir un identifiant et un mot de passe.';
+                errorDiv.classList.remove('hidden');
+            }
+            return;
+        }
+
         try {
-            // Vérification sécurisée auprès du Backend
             const response = await fetch(`${API_URL}/admin/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password: pass })
             });
 
-            const data = await response.json();
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (error) {
+                data = {};
+            }
 
-            if (data.success) {
-                if (errorDiv) errorDiv.classList.add('hidden');
-                initSecurity();
-            } else {
+            if (response.ok && data?.success !== false) {
+                const token = data?.token || data?.accessToken || data?.authToken || data?.jwt || data?.sessionToken || null;
+                adminSession = { isAuthenticated: true, token };
+                persistAdminToken(token);
+
                 if (errorDiv) {
-                    errorDiv.textContent = "❌ " + (data.message || "Identifiants incorrects.");
+                    errorDiv.textContent = '';
+                    errorDiv.classList.add('hidden');
+                }
+
+                showAdminWorkspace();
+                await runConsoleDashboard();
+            } else {
+                adminSession = { isAuthenticated: false, token: null };
+                persistAdminToken('');
+
+                if (errorDiv) {
+                    errorDiv.textContent = '❌ ' + (data?.message || 'Identifiants incorrects.');
                     errorDiv.classList.remove('hidden');
                 } else {
-                    alert("Échec d'authentification : Identifiants incorrects.");
+                    alert('Échec d\'authentification : Identifiants incorrects.');
                 }
             }
         } catch (error) {
-            alert("Erreur : Impossible de contacter le serveur Backend.");
+            adminSession = { isAuthenticated: false, token: null };
+            persistAdminToken('');
+
+            if (errorDiv) {
+                errorDiv.textContent = '❌ Impossible de contacter le serveur Backend.';
+                errorDiv.classList.remove('hidden');
+            } else {
+                alert('Erreur : Impossible de contacter le serveur Backend.');
+            }
         }
     }
 
-    loginBtn.onclick = handleLogin;
+    loginBtn.onclick = (event) => handleLogin(event);
+    loginForm.addEventListener('submit', handleLogin);
 
     [emailInput, passInput].forEach(input => {
         if (input) {
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') handleLogin();
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleLogin(e);
+                }
             });
         }
     });
@@ -419,7 +544,7 @@ function setupDashboardEvents() {
     const logoutTop = document.getElementById('admin-logout-top');
     if (logoutTop) {
         logoutTop.onclick = function() {
-            location.reload();
+            resetAdminAuthState();
         };
     }
 
@@ -517,4 +642,6 @@ function setupDashboardEvents() {
 document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
     initSecurity();
+    setupGateLogin();
+    await validateStoredSession();
 });
