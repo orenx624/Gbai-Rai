@@ -4,8 +4,8 @@
 // Ce fichier ne contient que de la présentation et des appels API.
 // =======================================================================
                                                                                                                                     
-const API_BASE = (window.__API_BASE__ || '/api').replace(/\/$/, '');
-const PUBLIC_POLL_INTERVAL_MS = 5000;
+const API_BASE = 'https://gbai-rai-backend-x.vercel.app/api';
+const PUBLIC_POLL_INTERVAL_MS = 6000;
 
 let publicRefreshTimer = null;
 let publicRefreshInFlight = false;
@@ -35,22 +35,12 @@ function shuffleArray(items) {
     return nextItems;
 }
 
-async function requestJsonWithFallback(paths, options = {}) {
-    const urls = paths.map(path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
-    let lastError = null;
-
-    for (const url of urls) {
-        try {
-            const res = await fetch(url, options);
-            const text = await res.text();
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            return text ? JSON.parse(text) : null;
-        } catch (error) {
-            lastError = error;
-        }
-    }
-
-    throw lastError || new Error('Erreur API');
+async function requestJson(path, options = {}) {
+    const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+    const res = await fetch(url, options);
+    const text = await res.text();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return text ? JSON.parse(text) : null;
 }
 
 function createCommentItem(comment) {
@@ -101,7 +91,7 @@ function startPublicPolling() {
 async function renderClashPage() {
     // Chargement des participants depuis le backend
     try {
-        const data = await requestJsonWithFallback(['/participants']);
+        const data = await requestJson('/participants');
         clashState.participants = Array.isArray(data) ? data : (data?.participants || []);
     } catch (e) {
         console.warn('Backend inaccessible, données indisponibles.', e);
@@ -231,7 +221,7 @@ async function renderClashPage() {
         if (clashState.voteState[clashState.currentIndex]) return;
 
         try {
-            const data = await requestJsonWithFallback(['/votes', '/vote'], {
+            const data = await requestJson('/votes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ participantId }),
@@ -256,7 +246,7 @@ async function renderClashPage() {
         if (!text || !partnerId) return;
 
         try {
-            const data = await requestJsonWithFallback(['/comments', '/comment'], {
+            const data = await requestJson('/comments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ participantId: partnerId, text }),
@@ -332,7 +322,7 @@ async function renderRadioCouloir() {
 
     // Chargement depuis le backend
     try {
-        const data = await requestJsonWithFallback(['/radio', '/radio/items']);
+        const data = await requestJson('/radio');
         radioCouloirItems = Array.isArray(data) ? data : (data?.items || data?.radioItems || []);
     } catch (e) {
         // fallback : items vides
@@ -365,7 +355,7 @@ async function renderRadioCouloir() {
 // -----------------------------------------------------------------------
 async function renderClassementPage() {
     try {
-        const data = await requestJsonWithFallback(['/classement']);
+        const data = await requestJson('/classement');
 
         const topParticipant = document.getElementById('top-participant');
         const topFive        = document.getElementById('top-five');

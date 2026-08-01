@@ -2,17 +2,8 @@
 // CONSOLE D'ADMINISTRATION PROFESSIONNELLE POUR GBAI-RAI (AVEC BACKEND)
 // =======================================================================
 
-// URL du backend configurable via window.__API_BASE__ ou /api par défaut.
-const API_URL = (window.__API_BASE__ || '/api').replace(/\/$/, '');
-
-const CONFIG = {
-    CURRENT_ADMIN_KEY: 'gbai_rai_current_logged_admin'
-};
-
-const defaultRadioItems = [
-    { id: 'radio-1', text: 'Un nouveau duel a été lancé au campus et tout le monde veut voter avant la fin de la journée.' },
-    { id: 'radio-2', text: 'Les rumeurs les plus chaudes circulent déjà dans les couloirs, et la radio couloir les relaye en temps réel.' }
-];
+// URL du backend Vercel.
+const API_URL = 'https://gbai-rai-backend-x.vercel.app/api';
 
 const defaultClashContent = {
     title: 'Clash des photos',
@@ -26,28 +17,18 @@ const defaultClashContent = {
 let participants = [];
 let clashContent = { ...defaultClashContent };
 
-async function requestJsonWithFallback(paths, options = {}) {
-    const urls = paths.map(path => `${API_URL}${path.startsWith('/') ? path : `/${path}`}`);
-    let lastError = null;
-
-    for (const url of urls) {
-        try {
-            const response = await fetch(url, options);
-            const text = await response.text();
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return text ? JSON.parse(text) : null;
-        } catch (error) {
-            lastError = error;
-        }
-    }
-
-    throw lastError || new Error('Erreur API');
+async function requestJson(path, options = {}) {
+    const url = `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
+    const response = await fetch(url, options);
+    const text = await response.text();
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return text ? JSON.parse(text) : null;
 }
 
 // 1. CHARGEMENT INITIAL DES DONNÉES DEPUIS LE BACKEND
 async function loadData() {
     try {
-        const payload = await requestJsonWithFallback(['/participants']);
+        const payload = await requestJson('/participants');
         participants = Array.isArray(payload) ? payload : (payload?.participants || []);
     } catch (error) {
         console.error('Erreur de connexion au serveur Backend:', error);
@@ -55,7 +36,7 @@ async function loadData() {
     }
 
     try {
-        const payload = await requestJsonWithFallback(['/content', '/config']);
+        const payload = await requestJson('/content');
         if (payload && typeof payload === 'object') {
             clashContent = {
                 ...defaultClashContent,
@@ -73,7 +54,7 @@ async function loadData() {
 
 async function loadRadioItems() {
     try {
-        const payload = await requestJsonWithFallback(['/radio', '/radio/items']);
+        const payload = await requestJson('/radio');
         return Array.isArray(payload) ? payload : (payload?.items || payload?.radioItems || []);
     } catch (error) {
         console.warn('Impossible de charger la radio depuis le backend:', error);
@@ -82,7 +63,7 @@ async function loadRadioItems() {
 }
 
 async function saveRadioItems(items) {
-    const payload = await requestJsonWithFallback(['/radio', '/radio/items'], {
+    const payload = await requestJson('/radio', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items })
@@ -91,7 +72,7 @@ async function saveRadioItems(items) {
 }
 
 async function saveLocalConfig() {
-    return requestJsonWithFallback(['/content', '/config'], {
+    return requestJson('/content', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(clashContent)
@@ -100,22 +81,14 @@ async function saveLocalConfig() {
 
 // 2. CONTRÔLE D'ACCÈS ET VÉRIFICATION DE SESSION
 function initSecurity() {
-    const session = localStorage.getItem(CONFIG.CURRENT_ADMIN_KEY);
     const gate = document.getElementById('admin-gate');
     const workspace = document.getElementById('admin-workspace');
     const logoutBtn = document.getElementById('admin-logout-top');
 
-    if (session) {
-        if(gate) gate.classList.add('hidden');
-        if(workspace) workspace.classList.remove('hidden');
-        if(logoutBtn) logoutBtn.classList.remove('hidden');
-        runConsoleDashboard();
-    } else {
-        if(gate) gate.classList.remove('hidden');
-        if(workspace) workspace.classList.add('hidden');
-        if(logoutBtn) logoutBtn.classList.add('hidden');
-        setupGateLogin();
-    }
+    if (gate) gate.classList.add('hidden');
+    if (workspace) workspace.classList.remove('hidden');
+    if (logoutBtn) logoutBtn.classList.remove('hidden');
+    runConsoleDashboard();
 }
 
 function setupGateLogin() {
@@ -142,7 +115,6 @@ function setupGateLogin() {
 
             if (data.success) {
                 if (errorDiv) errorDiv.classList.add('hidden');
-                localStorage.setItem(CONFIG.CURRENT_ADMIN_KEY, email || 'admin@orstore.com');
                 initSecurity();
             } else {
                 if (errorDiv) {
@@ -314,7 +286,7 @@ function renderParticipantManagement() {
 
         saveBtn.onclick = async function() {
             try {
-                await requestJsonWithFallback([`/participants/${participant.id}`], {
+                await requestJson(`/participants/${participant.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -337,7 +309,7 @@ function renderParticipantManagement() {
         deleteBtn.onclick = async function() {
             card.style.animation = 'fadeOutScale 0.25s forwards';
             try {
-                await requestJsonWithFallback([`/participants/${participant.id}`], {
+                await requestJson(`/participants/${participant.id}`, {
                     method: 'DELETE'
                 });
                 await loadData();
@@ -420,7 +392,7 @@ function renderIndividualComments(participantId) {
             card.classList.add('deleting');
             const commentId = comment.id || realIndex;
             try {
-                await requestJsonWithFallback([`/participants/${participantId}/comments/${commentId}`], {
+                await requestJson(`/participants/${participantId}/comments/${commentId}`, {
                     method: 'DELETE'
                 });
                 await loadData();
@@ -447,7 +419,6 @@ function setupDashboardEvents() {
     const logoutTop = document.getElementById('admin-logout-top');
     if (logoutTop) {
         logoutTop.onclick = function() {
-            localStorage.removeItem(CONFIG.CURRENT_ADMIN_KEY);
             location.reload();
         };
     }
