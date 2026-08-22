@@ -1,129 +1,88 @@
-/* =======================================================================
-   ADMINISTRATION PHOTOCLASH - GBAI-RAI
-   ======================================================================= */
+/* --- Styles Responsives & Chics pour l'Administration PhotoClash --- */
 
-/* --- 1. SECTIONS & PANNEAUX DE GESTION --- */
-.admin-section {
-    display: block;
-    background: var(--card-bg, rgba(30, 41, 59, 0.7));
-    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+@media (min-width: 1024px) {
+    /* Organisation en grille sur grand écran pour exploiter toute la largeur */
+    #photo-clash-settings .section-body {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 24px !important;
+        align-items: start;
+    }
+    
+    /* Faire s'étaler la liste complète des candidats sur toute la largeur si désiré */
+    #photo-clash-settings .section-body > div:nth-child(3) {
+        grid-column: span 2;
+    }
+}
+
+/* Harmonisation des cartes du panneau d'administration */
+.admin-panel-card {
+    background: rgba(15, 23, 42, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.admin-card-section {
-    background: rgba(15, 23, 42, 0.4);
-    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
-    border-radius: 12px;
-    padding: 1.2rem;
+.admin-panel-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
-/* --- 2. FORMULAIRES & INPUTS --- */
-.admin-card-section input,
-.admin-card-section textarea,
-.admin-card-section select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
-    color: #fff;
-    font-size: 0.92rem;
+/* Style chic pour les champs de saisie et sélecteurs */
+.admin-panel-card input[type="text"],
+.admin-panel-card input[type="url"],
+.admin-panel-card input[type="file"],
+.admin-panel-card select,
+.admin-panel-card textarea {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+    color: #fff !important;
+    font-size: 0.95rem !important;
+    transition: all 0.2s ease;
+}
+
+.admin-panel-card input:focus,
+.admin-panel-card select:focus,
+.admin-panel-card textarea:focus {
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    border-color: var(--red, #ef4444) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
-.admin-card-section input:focus,
-.admin-card-section textarea:focus,
-.admin-card-section select:focus {
-    border-color: var(--primary, #38bdf8);
-    box-shadow: 0 0 10px var(--accent-glow, rgba(56, 189, 248, 0.15));
-}
-
-.admin-card-section p {
-    font-size: 0.78rem !important;
-    color: var(--text-muted, #94a3b8) !important;
-    margin: 2px 0 8px 0 !important;
-    line-height: 1.2 !important;
-}
-
-/* --- 3. AVATARS CIRCULAIRES & LISTE CANDIDATS --- */
-.candidate-edit-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    margin-bottom: 8px;
-}
-
-.candidate-edit-card img, 
-.candidate-avatar-thumb {
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px;
-    min-height: 40px;
-    border-radius: 50% !important;
-    object-fit: cover !important;
-    border: 2px solid var(--purple, #8b5cf6);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-.candidate-info {
-    flex: 1;
-    overflow: hidden;
-}
-
-.candidate-info h4 {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #f8fafc;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* --- 4. BOUTONS STYLISÉS --- */
-.btn-primary, .btn-danger, .btn-secondary, .btn-soft {
-    padding: 0.75rem 1.2rem;
-    border-radius: 10px;
-    border: none;
-    font-weight: 600;
-    font-size: 0.9rem;
+/* Bouton de suppression propre et sécurisant (évite le look brut en blanc) */
+.btn-danger, button.delete-btn, .delete-comment-btn {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
     cursor: pointer;
     transition: all 0.2s ease;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary, #38bdf8) 0%, var(--purple, #8b5cf6) 100%);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
+.btn-danger:hover, button.delete-btn:hover, .delete-comment-btn:hover {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
+/* Boutons d'action principaux */
+.admin-panel-card .btn-primary,
+.admin-panel-card .btn-secondary {
+    border-radius: 10px !important;
+    padding: 12px !important;
+    transition: all 0.2s ease;
 }
 
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.btn-soft {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+/* Liste des candidats dynamique en colonnes sur PC */
+#participant-management-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+    gap: 16px !important;
+    margin-top: 1rem !important;
 }
