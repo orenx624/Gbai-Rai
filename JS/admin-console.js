@@ -343,7 +343,8 @@ async function renderRadioItemsAdmin() {
         deleteBtn.style.padding = '0.4rem 0.8rem';
         deleteBtn.style.fontSize = '0.8rem';
         deleteBtn.innerHTML = '🗑️ Supprimer';
-        deleteBtn.onclick = async function() {
+        deleteBtn.onclick = async function(e) {
+            e.stopPropagation(); // <-- Ajouté ici
             const nextItems = items.filter(entry => entry.id !== item.id);
             await saveRadioItems(nextItems);
             await renderRadioItemsAdmin();
@@ -397,7 +398,8 @@ function renderParticipantManagement() {
         const saveBtn = card.querySelector('.participant-save-btn');
         const deleteBtn = card.querySelector('.participant-delete-btn');
 
-        saveBtn.onclick = async function() {
+        saveBtn.onclick = async function(e) {
+            e.stopPropagation(); // <-- Ajouté ici
             try {
                 await requestJson(`/participants/${participant.id}`, {
                     method: 'PUT',
@@ -419,7 +421,8 @@ function renderParticipantManagement() {
             }
         };
 
-        deleteBtn.onclick = async function() {
+        deleteBtn.onclick = async function(e) {
+            e.stopPropagation(); // <-- Ajouté ici
             try {
                 await requestJson(`/participants/${participant.id}`, { method: 'DELETE' });
                 await loadData();
@@ -478,7 +481,8 @@ function renderIndividualComments(participantId) {
             <button class="btn-danger btn-delete-single" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">🗑️</button>
         `;
 
-        card.querySelector('.btn-delete-single').onclick = async function() {
+        card.querySelector('.btn-delete-single').onclick = async function(e) {
+            e.stopPropagation(); // <-- Ajouté ici
             const commentId = comment.id || realIndex;
             try {
                 await requestJson(`/participants/${participantId}/comments/${commentId}`, { method: 'DELETE' });
