@@ -32,11 +32,10 @@ function persistAdminToken(token) {
     try {
         if (token) {
             localStorage.setItem(ADMIN_SESSION_STORAGE_KEY, token);
-        } else {
-            localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
         }
+        // On retire le "else { localStorage.removeItem(...) }" pour éviter qu'un appel vide n'efface votre session active par mégarde.
     } catch (error) {
-        console.warn('Impossible de persister le jeton d’authentification:', error);
+        console.warn('Impossible de persister le jeton d\'authentification:', error);
     }
 }
 
