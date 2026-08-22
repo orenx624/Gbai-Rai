@@ -8,86 +8,108 @@
     <link rel="stylesheet" href="CSS/index.css">
 </head>
 <body class="page-home">
-    <!-- Barre de navigation du site -->
     <header class="site-header">
         <div class="logo-wrapper">
             <a href="index.html" class="back-link" aria-label="Retour en arrière" title="Retour en arrière">←</a>
-            <div class="logo">Gbai<span>-</span>Rai</div>
+            <h1 class="app-title">Gbai<span>-</span>Rai</h1>
         </div>
         <nav class="site-nav">
             <a href="index.html" class="active">Accueil</a>
             <a href="clash.html">Clashs</a>
-            <a href="classement.html">Classement</a>²
+            <a href="classement.html">Classement<sup>2</sup></a>
         </nav>
     </header>
 
-    <!-- Contenu Principal -->
     <main class="container">
-        
         <div class="welcome-box">
             <h1>🔥 Bienvenue sur Gbai-Rai</h1>
             <p>Tout ce qui se passe au campus reste ici. Anonymat totalement garanti.</p>
         </div>
 
-        <section class="web-grid">
-            <!-- SECTION 1 : VOTE SUR PHOTOS -->
-            <div class="card card-highlight">
-                <div class="card-header">
-                    <h2>📸 Photo Clash</h2>
-                    <span class="badge hot">Live</span>
-                </div>
-                <p class="card-desc">Le duel du moment t'attend. Prêt à choisir ton favori ?</p>
-                <a class="clash-teaser" href="clash.html" aria-label="Découvrir le clash photo">
-                    <div class="teaser-body">
-                        <div class="teaser-icon">🔥</div>
-                        <div>
-                            <h3>🔥 Vous ne pouvez pas croire ce qui s'est passé !</h3>
-                            <p>Appuyez pour découvrir...</p>
-                        </div>
+        <!-- GRILLE DE 6 CARTES TAILLE UNIFORME -->
+        <section class="activities-grid">
+            
+            <!-- 1. PHOTO CLASH -->
+            <div class="card card-teal" onclick="window.location.href='clash.html'">
+                <div>
+                    <div class="card-top">
+                        <span class="card-icon">📸</span>
+                        <span class="badge badge-live">Live</span>
                     </div>
-                    <span class="teaser-action">Découvrir le clash →</span>
-                </a>
+                    <div class="card-title">Photo Clash</div>
+                    <div class="card-desc">Duels campus & votes.</div>
+                </div>
+                <a href="clash.html" class="card-action">Voter &rarr;</a>
             </div>
 
-            <!-- SECTION 2 : RADIO COULOIR (RUMEURS) -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>🤫 Radio Couloir</h2>
-                    <span class="badge spicy">Spicy</span>
-                </div>
-                <div class="rumor-content">
-                    <p id="radio-couloir-text">Chargement des infos...</p>
-                    <div class="radio-footer">
-                        <span id="radio-couloir-counter" class="radio-counter">0 / 0</span>
+            <!-- 2. RADIO COULOIR (REDIRECTION VERS PAGE DÉDIÉE) -->
+            <div class="card card-purple" onclick="window.location.href='radio.html'">
+                <div>
+                    <div class="card-top">
+                        <span class="card-icon">🤫</span>
+                        <span class="badge badge-spicy">Spicy</span>
                     </div>
+                    <div class="card-title">Radio Couloir</div>
+                    <div class="card-desc">Les rumeurs & potins.</div>
                 </div>
-                <div class="card-footer">
-                    <span>👀 <span id="view-count">1420</span> vus</span>
-                    <div class="actions">
-                        <button class="btn-sub" data-action="info">💯 Info</button>
-                        <button class="btn-sub" data-action="intox">❌ Intox</button>
-                    </div>
-                </div>
+                <a href="radio.html" class="card-action">Écouter &rarr;</a>
             </div>
 
-            <!-- SECTION 3 : LA GAZETTE (NEWS) -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>📰 Gazette du Campus</h2>
-                </div>
-                <div class="news-list">
-                    <div class="news-item">
-                        <h3>⚠️ Rupture de stock critique</h3>
-                        <p>Plus aucun grain de café disponible au distributeur du bâtiment B. Révolte imminente des étudiants en examen.</p>
+            <!-- 3. GAZETTE DU CAMPUS -->
+            <div class="card card-blue" onclick="window.location.href='gazette.html'">
+                <div>
+                    <div class="card-top">
+                        <span class="card-icon">📰</span>
+                        <span class="badge badge-info">Info</span>
                     </div>
-                    <div class="news-item">
-                        <h3>🎉 Post-Intégration</h3>
-                        <p>La vidéo récap de la soirée d'intégration a fuité. Elle est dispo dans l'onglet médias secrets.</p>
-                    </div>
+                    <div class="card-title">Gazette du Campus</div>
+                    <div class="card-desc">Alertes & actus du campus.</div>
                 </div>
+                <a href="gazette.html" class="card-action">Consulter &rarr;</a>
             </div>
+
+            <!-- 4. SONDAGES FLASH -->
+            <div class="card card-green" onclick="window.location.href='sondages.html'">
+                <div>
+                    <div class="card-top">
+                        <span class="card-icon">📊</span>
+                        <span class="badge badge-new">New</span>
+                    </div>
+                    <div class="card-title">Sondages Flash</div>
+                    <div class="card-desc">Ton avis compte.</div>
+                </div>
+                <a href="sondages.html" class="card-action">Participer &rarr;</a>
+            </div>
+
+            <!-- 5. CONFESSIONS CAMPUS -->
+            <div class="card card-red" onclick="window.location.href='confessions.html'">
+                <div>
+                    <div class="card-top">
+                        <span class="card-icon">🎭</span>
+                        <span class="badge badge-anonyme">Anonyme</span>
+                    </div>
+                    <div class="card-title">Confessions</div>
+                    <div class="card-desc">Secrets 100% anonymes.</div>
+                </div>
+                <a href="confessions.html" class="card-action">Partager &rarr;</a>
+            </div>
+
+            <!-- 6. PETITES ANNONCES -->
+            <div class="card card-amber" onclick="window.location.href='annonces.html'">
+                <div>
+                    <div class="card-top">
+                        <span class="card-icon">🎫</span>
+                        <span class="badge badge-utile">Utile</span>
+                    </div>
+                    <div class="card-title">Petites Annonces</div>
+                    <div class="card-desc">Achète, vends, services.</div>
+                </div>
+                <a href="annonces.html" class="card-action">Voir tout &rarr;</a>
+            </div>
+
         </section>
 
+        
     </main>
 
     <script src="JS/a.js"></script>

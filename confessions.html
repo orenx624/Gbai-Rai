@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confessions - Gbai-Rai</title>
+    <link rel="stylesheet" href="CSS/common.css">
+    <link rel="stylesheet" href="CSS/index.css">
+</head>
+<body class="page-confessions">
+    <header class="site-header">
+        <div class="logo-wrapper">
+            <a href="index.html" class="back-link" aria-label="Retour">←</a>
+            <h1 class="app-title">Mur<span>-</span>Confessions</h1>
+        </div>
+        <nav class="site-nav">
+            <a href="index.html">Accueil</a>
+            <a href="clash.html">Clashs</a>
+            <a href="classement.html">Classement<sup>2</sup></a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="confess-box">
+            <h2>🎭 Libère ton secret (100% Anonyme)</h2>
+            <textarea class="custom-input" placeholder="Écris ta confession ici sans crainte..."></textarea>
+            <div class="confess-actions">
+                <select class="category-select">
+                    <option>🔥 Amour & Crush</option>
+                    <option>📚 Examens & Profs</option>
+                    <option>🤫 Secret Brut</option>
+                </select>
+                <button class="btn-primary">Publier</button>
+            </div>
+        </div>
+
+        <h2 class="section-title">🔥 Confessions Recentes</h2>
+
+        <div class="confessions-feed">
+            <div class="confession-card">
+                <div class="confession-header">
+                    <span class="confession-id">#Confession 304</span>
+                    <span class="badge badge-anonyme">Amour & Crush</span>
+                </div>
+                <p class="confession-text">Je suis amoureux(se) du délégué de la filière Finance depuis le premier jour, mais je n'ai jamais osé lui parler...</p>
+                
+                <div class="confession-reactions">
+                    <button class="react-btn">❤️ 42</button>
+                    <button class="react-btn">😱 12</button>
+                    <button class="react-btn">💬 5 Commentaires</button>
+                </div>
+
+                <div class="comments-section">
+                    <div class="comment">
+                        <strong>Anonyme #1:</strong> <span>Va lui parler gros, la vie est courte !</span>
+                    </div>
+                    <div class="comment">
+                        <strong>Anonyme #2:</strong> <span>C'est bon, on a tous compris de qui tu parles 😂</span>
+                    </div>
+                    <div class="add-comment">
+                        <input type="text" placeholder="Répondre anonymement..." class="comment-input">
+                        <button class="btn-sub">Envoyer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

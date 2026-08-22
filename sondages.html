@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sondages Flash - Gbai-Rai</title>
+    <link rel="stylesheet" href="CSS/common.css">
+    <link rel="stylesheet" href="CSS/index.css">
+</head>
+<body class="page-sondages">
+    <header class="site-header">
+        <div class="logo-wrapper">
+            <a href="index.html" class="back-link" aria-label="Retour">←</a>
+            <h1 class="app-title">Sondages<span>-</span>Flash</h1>
+        </div>
+        <nav class="site-nav">
+            <a href="index.html">Accueil</a>
+            <a href="clash.html">Clashs</a>
+            <a href="classement.html">Classement<sup>2</sup></a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="welcome-box">
+            <h1>📊 Sondage Actif du Jour</h1>
+            <p>Vote anonymement et découvre les tendances en direct.</p>
+        </div>
+
+        <div class="poll-card">
+            <div class="poll-header">
+                <span class="badge badge-live">En cours</span>
+                <span class="poll-timer">⏱️ Finit dans 4h</span>
+            </div>
+            <h3 class="poll-question">Combien d'heures dormez-vous par nuit pendant les révisions ?</h3>
+            
+            <div class="poll-options">
+                <div class="poll-option-btn">
+                    <div class="option-fill" style="width: 15%;"></div>
+                    <span class="option-label">Moins de 4 heures</span>
+                    <span class="option-percent">15%</span>
+                </div>
+
+                <div class="poll-option-btn voted">
+                    <div class="option-fill" style="width: 58%;"></div>
+                    <span class="option-label">Entre 4h et 6h</span>
+                    <span class="option-percent">58%</span>
+                </div>
+
+                <div class="poll-option-btn">
+                    <div class="option-fill" style="width: 27%;"></div>
+                    <span class="option-label">Plus de 7 heures (Les rois)</span>
+                    <span class="option-percent">27%</span>
+                </div>
+            </div>
+
+            <div class="poll-footer">
+                <span>🗳️ 482 votes enregistrés</span>
+            </div>
+        </div>
+
+        <div class="create-poll-card">
+            <h3>💡 Une idée de sondage ?</h3>
+            <p>Propose ta question, elle sera validée puis mise au vote.</p>
+            <textarea class="custom-input" placeholder="Écris ta question ici..."></textarea>
+            <button class="btn-primary">Proposer mon sondage</button>
+        </div>
+    </main>
+</body>
+</html>

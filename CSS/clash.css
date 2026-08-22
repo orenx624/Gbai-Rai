@@ -1,5 +1,6 @@
 .duel-page {
     min-height: calc(100vh - 100px);
+    padding-bottom: 6rem;
 }
 
 .duel-card,
@@ -35,8 +36,8 @@
 
 .duel-content {
     display: grid;
-    grid-template-columns: repeat(2, minmax(260px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
     align-items: start;
     transition: transform 0.35s ease;
 }
@@ -45,14 +46,15 @@
 .slide-right { transform: translateX(100%); }
 
 .photo-card {
-    padding: 1.5rem;
+    padding: 1.2rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    min-height: 520px;
+    gap: 0.9rem;
+    min-height: 480px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border);
     border-radius: 24px;
+    min-width: 0;
 }
 
 .photo-card img {
@@ -78,10 +80,15 @@
 }
 
 .action-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+
+.action-bar .btn {
+    width: 100%;
+    justify-content: center;
 }
 
 .vote-status {
@@ -187,13 +194,37 @@
 }
 
 .btn-next {
-    margin: 2rem auto 0;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
     display: inline-flex;
-    padding: 0.95rem 1.5rem;
-    color: #0f172a;
-    background: var(--primary);
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0.95rem 1.35rem;
+    min-width: 140px;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: linear-gradient(135deg, #7c3aed 0%, #22d3ee 100%);
+    border: none;
     border-radius: 999px;
+    box-shadow: 0 14px 30px rgba(34, 211, 238, 0.28);
     width: max-content;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.btn-next:hover,
+.btn-next:focus-visible {
+    transform: scale(1.05);
+    box-shadow: 0 16px 34px rgba(34, 211, 238, 0.35);
+    filter: brightness(1.05);
+}
+
+.btn-next:active {
+    transform: scale(0.98);
 }
 
 @media (max-width: 900px) {
@@ -202,7 +233,8 @@
     }
 
     .duel-content {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
     }
 }
 
@@ -212,21 +244,15 @@
     }
 
     .duel-content {
-        display: flex;
-        flex-direction: row;
-        gap: 0.75rem;
-        overflow-x: auto;
-        padding-bottom: 0.25rem;
-        scroll-snap-type: x proximity;
-        -webkit-overflow-scrolling: touch;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+        overflow: hidden;
     }
 
     .photo-card {
-        flex: 0 0 calc(50% - 0.4rem);
-        min-width: min(47vw, 220px);
         min-height: auto;
         padding: 1rem;
-        scroll-snap-align: start;
     }
 
     .photo-card img {
@@ -236,7 +262,7 @@
     }
 
     .action-bar {
-        flex-direction: column;
+        grid-template-columns: 1fr;
     }
 
     .bubble-actions {
@@ -244,10 +270,10 @@
     }
 
     .btn-next {
-        margin: 1.2rem auto 0;
-        display: inline-flex;
-        justify-content: center;
-        align-self: center;
+        right: 16px;
+        bottom: 16px;
+        min-width: 124px;
+        padding: 0.9rem 1.2rem;
     }
 }
 

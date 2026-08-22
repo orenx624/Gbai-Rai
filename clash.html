@@ -19,7 +19,8 @@
             <a href="classement.html">Classement</a>
         </nav>
         <div class="header-actions">
-            <button id="admin-open" class="btn btn-secondary" type="button">Admin</button>
+            <button id="admin-login" class="btn btn-secondary btn-admin" type="button">Connexion Admin</button>
+            <button id="admin-logout" class="btn btn-secondary btn-admin hidden" type="button">Déconnexion</button>
         </div>
     </header>
 
@@ -45,7 +46,7 @@
                         <button id="comment-left-btn" class="btn btn-outline" type="button">Commenter</button>
                         <button id="view-comments-left-btn" class="btn btn-soft" type="button">Voir les commentaires</button>
                     </div>
-                    <div id="comments-left" class="comment-list"></div>
+                    <div id="comments-left" class="comment-list hidden"></div>
                     <div class="comment-bubble hidden" id="bubble-left">
                         <div class="bubble-inner">
                             <textarea id="input-left" placeholder="Écris ton commentaire..."></textarea>
@@ -69,7 +70,7 @@
                         <button id="comment-right-btn" class="btn btn-outline" type="button">Commenter</button>
                         <button id="view-comments-right-btn" class="btn btn-soft" type="button">Voir les commentaires</button>
                     </div>
-                    <div id="comments-right" class="comment-list"></div>
+                    <div id="comments-right" class="comment-list hidden"></div>
                     <div class="comment-bubble hidden" id="bubble-right">
                         <div class="bubble-inner">
                             <textarea id="input-right" placeholder="Écris ton commentaire..."></textarea>
@@ -94,7 +95,7 @@
             <div id="bottom-comments-list" class="bottom-comments-list"></div>
         </section>
 
-        <button id="next-duel" class="btn-next" type="button">Suivant</button>
+        <button id="next-duel" class="btn-next" type="button">Suivant ➔</button>
     </main>
 
     <script src="JS/a.js"></script>

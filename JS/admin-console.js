@@ -1,8 +1,8 @@
 // =======================================================================
-// CONSOLE D'ADMINISTRATION PROFESSIONNELLE POUR GBAI-RAI (AVEC BACKEND)
+// CONSOLE D'ADMINISTRATION PROFESSIONNELLE POUR GBAI-RAI (SANS REDIRECTION JS)
 // =======================================================================
 
-// URL du backend Vercel.
+// URL du backend Vercel
 const API_URL = 'https://gbai-rai-backend-x.vercel.app/api';
 const ADMIN_SESSION_STORAGE_KEY = 'gbai_admin_session_token';
 
@@ -88,7 +88,7 @@ async function requestJson(path, options = {}) {
     return text ? JSON.parse(text) : null;
 }
 
-// 1. CHARGEMENT INITIAL DES DONNÉES DEPUIS LE BACKEND
+// 1. CHARGEMENT INITIAL DES DONNÉES
 async function loadData() {
     try {
         const payload = await requestJson('/participants');
@@ -126,12 +126,11 @@ async function loadRadioItems() {
 }
 
 async function saveRadioItems(items) {
-    const payload = await requestJson('/radio', {
+    return requestJson('/radio', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items })
     });
-    return payload;
 }
 
 async function saveLocalConfig() {
@@ -142,7 +141,7 @@ async function saveLocalConfig() {
     });
 }
 
-// 2. CONTRÔLE D'ACCÈS ET VÉRIFICATION DE SESSION
+// 2. CONTRÔLE D'ACCÈS
 async function validateStoredSession() {
     const token = getStoredAdminToken();
     if (!token) {
@@ -184,7 +183,7 @@ function setupGateLogin() {
     const passInput = document.getElementById('gate-password');
     const errorDiv = document.getElementById('gate-error');
 
-    if (!loginBtn || !loginForm) return;
+    if (!loginBtn && !loginForm) return;
 
     async function handleLogin(event) {
         if (event) event.preventDefault();
@@ -208,11 +207,7 @@ function setupGateLogin() {
             });
 
             let data = {};
-            try {
-                data = await response.json();
-            } catch (error) {
-                data = {};
-            }
+            try { data = await response.json(); } catch (error) { data = {}; }
 
             if (response.ok && data?.success !== false) {
                 const token = data?.token || data?.accessToken || data?.authToken || data?.jwt || data?.sessionToken || null;
@@ -250,8 +245,8 @@ function setupGateLogin() {
         }
     }
 
-    loginBtn.onclick = (event) => handleLogin(event);
-    loginForm.addEventListener('submit', handleLogin);
+    if (loginBtn) loginBtn.onclick = (event) => handleLogin(event);
+    if (loginForm) loginForm.addEventListener('submit', handleLogin);
 
     [emailInput, passInput].forEach(input => {
         if (input) {
@@ -267,7 +262,6 @@ function setupGateLogin() {
 
 function updateAdminScrollIndicators() {
     const cards = document.querySelectorAll('.admin-card-section');
-
     cards.forEach(card => {
         const maxScrollTop = Math.max(0, card.scrollHeight - card.clientHeight);
         const progress = maxScrollTop > 0 ? Math.min(1, card.scrollTop / maxScrollTop) : 0;
@@ -277,12 +271,10 @@ function updateAdminScrollIndicators() {
 
 function initAdminScrollIndicators() {
     const cards = document.querySelectorAll('.admin-card-section');
-
     cards.forEach(card => {
         card.addEventListener('scroll', updateAdminScrollIndicators, { passive: true });
         card.addEventListener('mouseenter', updateAdminScrollIndicators);
     });
-
     window.addEventListener('resize', updateAdminScrollIndicators);
     updateAdminScrollIndicators();
 }
@@ -319,12 +311,12 @@ function populateParticipantSelector() {
 }
 
 async function renderRadioItemsAdmin() {
-    const list = document.getElementById('radio-items-list');
+    const list = document.getElementById('radio-items-list') || document.getElementById('radio-admin-list');
     if (!list) return;
 
     const items = await loadRadioItems();
     if (!items.length) {
-        list.innerHTML = '<div class="comment-empty" style="color: var(--primary);">Aucune information pour la radio couloir.</div>';
+        list.innerHTML = '<div class="comment-empty" style="color: var(--primary, #38bdf8);">Aucune information pour la radio couloir.</div>';
         return;
     }
 
@@ -338,9 +330,8 @@ async function renderRadioItemsAdmin() {
         row.style.padding = '0.75rem 0.9rem';
         row.style.borderRadius = '12px';
         row.style.background = 'rgba(255,255,255,0.04)';
-        row.style.border = '1px solid var(--border)';
-        row.style.animation = 'fadeInSlideUp 0.3s ease forwards';
-        row.style.transition = 'all 0.25s ease';
+        row.style.border = '1px solid rgba(255,255,255,0.1)';
+        row.style.marginBottom = '0.5rem';
 
         const text = document.createElement('p');
         text.style.margin = '0';
@@ -350,15 +341,14 @@ async function renderRadioItemsAdmin() {
         text.textContent = item.text;
 
         const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn-delete-single';
-        deleteBtn.innerHTML = '<span>🗑️</span> <span>Supprimer</span>';
+        deleteBtn.className = 'btn-danger';
+        deleteBtn.style.padding = '0.4rem 0.8rem';
+        deleteBtn.style.fontSize = '0.8rem';
+        deleteBtn.innerHTML = '🗑️ Supprimer';
         deleteBtn.onclick = async function() {
-            row.style.animation = 'fadeOutScale 0.25s forwards';
-            setTimeout(async () => {
-                const nextItems = items.filter(entry => entry.id !== item.id);
-                await saveRadioItems(nextItems);
-                await renderRadioItemsAdmin();
-            }, 220);
+            const nextItems = items.filter(entry => entry.id !== item.id);
+            await saveRadioItems(nextItems);
+            await renderRadioItemsAdmin();
         };
 
         row.appendChild(text);
@@ -372,7 +362,7 @@ function renderParticipantManagement() {
     if (!list) return;
 
     if (!participants.length) {
-        list.innerHTML = '<div class="comment-empty" style="color: var(--primary);">Aucun candidat enregistré. Ajoutez-en un pour lancer le duel.</div>';
+        list.innerHTML = '<div class="comment-empty" style="color: var(--primary, #38bdf8);">Aucun candidat enregistré. Ajoutez-en un ci-dessus.</div>';
         return;
     }
 
@@ -380,32 +370,32 @@ function renderParticipantManagement() {
     participants.forEach(participant => {
         const card = document.createElement('div');
         card.className = 'candidate-edit-card';
+        card.style.background = 'rgba(255,255,255,0.03)';
+        card.style.padding = '0.8rem';
+        card.style.borderRadius = '12px';
+        card.style.marginBottom = '0.75rem';
+        card.style.border = '1px solid rgba(255,255,255,0.08)';
 
         card.innerHTML = `
-            <div class="candidate-edit-header">
-                <img src="${participant.photo}" alt="${participant.name}">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem;">
+                <img src="${participant.photo}" alt="${participant.name}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                 <div>
-                    <strong style="color: #fff; font-size: 1rem;">${participant.name}</strong>
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">${participant.votes || 0} votes enregistrés</div>
+                    <strong style="color: #fff; font-size: 0.95rem;">${participant.name}</strong>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">${participant.votes || 0} votes enregistrés</div>
                 </div>
             </div>
-            <div style="display: grid; gap: 0.6rem;">
-                <input class="participant-edit-name" value="${participant.name}" placeholder="Nom du candidat" style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.25); color: #fff;">
-                <input class="participant-edit-photo" value="${participant.photo}" placeholder="URL de la photo" style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.25); color: #fff;">
-                <select class="participant-edit-gender" style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--border); background: rgba(15,23,42,0.95); color: #fff;">
-                    <option value="M" ${participant.gender === 'M' ? 'selected' : ''}>Masculin (Roi)</option>
-                    <option value="F" ${participant.gender === 'F' ? 'selected' : ''}>Féminin (Reine)</option>
-                </select>
+            <div style="display: grid; gap: 0.5rem;">
+                <input class="participant-edit-name" value="${participant.name}" placeholder="Nom du candidat" style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: #fff;">
+                <input class="participant-edit-photo" value="${participant.photo}" placeholder="URL de la photo" style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: #fff;">
             </div>
-            <div style="display: flex; gap: 0.6rem; margin-top: 0.2rem;">
-                <button class="btn btn-primary participant-save-btn" type="button" style="padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: bold; width: auto;">💾 Enregistrer</button>
-                <button class="btn btn-soft participant-delete-btn" type="button" style="color: var(--red); padding: 0.6rem 1rem; font-size: 0.85rem; width: auto;">🗑️ Supprimer</button>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.6rem;">
+                <button class="btn-primary participant-save-btn" type="button" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">💾 Enregistrer</button>
+                <button class="btn-danger participant-delete-btn" type="button" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">🗑️ Supprimer</button>
             </div>
         `;
 
         const nameInput = card.querySelector('.participant-edit-name');
         const photoInput = card.querySelector('.participant-edit-photo');
-        const genderSelect = card.querySelector('.participant-edit-gender');
         const saveBtn = card.querySelector('.participant-save-btn');
         const deleteBtn = card.querySelector('.participant-delete-btn');
 
@@ -417,7 +407,7 @@ function renderParticipantManagement() {
                     body: JSON.stringify({
                         name: nameInput.value.trim() || participant.name,
                         photo: photoInput.value.trim() || participant.photo,
-                        gender: genderSelect.value
+                        gender: participant.gender || 'M'
                     })
                 });
                 saveBtn.textContent = '✓ Modifié !';
@@ -432,11 +422,8 @@ function renderParticipantManagement() {
         };
 
         deleteBtn.onclick = async function() {
-            card.style.animation = 'fadeOutScale 0.25s forwards';
             try {
-                await requestJson(`/participants/${participant.id}`, {
-                    method: 'DELETE'
-                });
+                await requestJson(`/participants/${participant.id}`, { method: 'DELETE' });
                 await loadData();
                 renderParticipantManagement();
                 populateParticipantSelector();
@@ -456,10 +443,8 @@ function renderIndividualComments(participantId) {
 
     if (!participantId) {
         stream.innerHTML = `
-            <div class="comment-empty" style="text-align: center; padding: 2rem 1rem; color: var(--text-muted);">
-                <div style="font-size: 2rem; margin-bottom: 0.5rem;">👆</div>
-                <strong>Sélectionnez un candidat ci-dessus</strong>
-                <p style="font-size: 0.85rem; margin-top: 0.25rem;">Choisissez un participant dans la liste pour auditer ses commentaires.</p>
+            <div class="comment-empty" style="text-align: center; padding: 1.5rem 1rem; color: #94a3b8;">
+                <p style="font-size: 0.85rem;">Sélectionnez un participant ci-dessus pour examiner ses commentaires.</p>
             </div>
         `;
         return;
@@ -468,58 +453,37 @@ function renderIndividualComments(participantId) {
     const participant = participants.find(p => p.id === participantId);
     if (!participant) return;
 
-    const previewHeader = document.createElement('div');
-    previewHeader.className = 'mod-candidate-preview';
-    previewHeader.innerHTML = `
-        <img src="${participant.photo}" alt="${participant.name}">
-        <div class="mod-candidate-info">
-            <h4>${participant.name} <span class="badge" style="font-size:0.7rem; padding:0.15rem 0.5rem;">${participant.gender === 'F' ? 'Reine 👑' : 'Roi 👑'}</span></h4>
-            <div class="mod-candidate-stats">
-                <span>🔥 ${participant.votes || 0} votes</span>
-                <span class="mod-badge-count">💬 ${participant.comments ? participant.comments.length : 0} com(s)</span>
-            </div>
-        </div>
-    `;
-
     stream.innerHTML = '';
-    stream.appendChild(previewHeader);
 
     if (!participant.comments || participant.comments.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'comment-empty';
-        empty.style.color = 'var(--primary)';
-        empty.style.padding = '1.5rem';
-        empty.style.textAlign = 'center';
-        empty.innerHTML = '✨ Aucun commentaire sous cette photo.';
-        stream.appendChild(empty);
+        stream.innerHTML = '<div class="comment-empty" style="color: var(--primary, #38bdf8); padding: 1rem; text-align: center;">✨ Aucun commentaire sous cette photo.</div>';
         return;
     }
 
     participant.comments.slice().reverse().forEach((comment, indexInverted) => {
         const realIndex = participant.comments.length - 1 - indexInverted;
-
         const card = document.createElement('div');
-        card.className = 'mod-comment-card';
+        card.style.display = 'flex';
+        card.style.justifyContent = 'space-between';
+        card.style.alignItems = 'center';
+        card.style.padding = '0.6rem 0.8rem';
+        card.style.background = 'rgba(255,255,255,0.03)';
+        card.style.border = '1px solid rgba(255,255,255,0.08)';
+        card.style.borderRadius = '8px';
+        card.style.marginBottom = '0.5rem';
 
         card.innerHTML = `
-            <div class="mod-comment-content">
-                <p class="mod-comment-text">${comment.text}</p>
-                <div class="mod-comment-time">
-                    <span>🕒</span> <span>${comment.time || 'Date inconnue'}</span>
-                </div>
+            <div>
+                <p style="margin: 0; color: #fff; font-size: 0.88rem;">${comment.text}</p>
+                <span style="font-size: 0.75rem; color: #94a3b8;">🕒 ${comment.time || 'Récemment'}</span>
             </div>
-            <button class="btn-delete-single" data-index="${realIndex}">
-                <span>🗑️</span> <span>Supprimer</span>
-            </button>
+            <button class="btn-danger btn-delete-single" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">🗑️</button>
         `;
 
         card.querySelector('.btn-delete-single').onclick = async function() {
-            card.classList.add('deleting');
             const commentId = comment.id || realIndex;
             try {
-                await requestJson(`/participants/${participantId}/comments/${commentId}`, {
-                    method: 'DELETE'
-                });
+                await requestJson(`/participants/${participantId}/comments/${commentId}`, { method: 'DELETE' });
                 await loadData();
                 renderIndividualComments(participantId);
                 populateParticipantSelector();
@@ -536,109 +500,111 @@ function renderIndividualComments(participantId) {
 function prefillConfigurationFields() {
     if(document.getElementById('cfg-clash-title')) document.getElementById('cfg-clash-title').value = clashContent.title;
     if(document.getElementById('cfg-clash-desc')) document.getElementById('cfg-clash-desc').value = clashContent.description;
-    if(document.getElementById('cfg-left-title')) document.getElementById('cfg-left-title').value = clashContent.summaryLeftTitle;
-    if(document.getElementById('cfg-left-text')) document.getElementById('cfg-left-text').value = clashContent.summaryLeftText;
 }
 
 function setupDashboardEvents() {
-    const logoutTop = document.getElementById('admin-logout-top');
-    if (logoutTop) {
-        logoutTop.onclick = function() {
+    const logoutBtn = document.getElementById('admin-logout-top');
+    if (logoutBtn) {
+        logoutBtn.onclick = function() {
             resetAdminAuthState();
         };
     }
 
-    // AJOUTER UN CANDIDAT (Envoi vers le Backend via HTTP)
-    const addBtn = document.getElementById('add-candidate-btn');
-    if (addBtn) {
-        addBtn.onclick = async function() {
-            const name = document.getElementById('new-candidate-name').value.trim();
-            const photoInputValue = document.getElementById('new-candidate-photo').value.trim();
-            const gender = document.getElementById('new-candidate-gender').value;
+    const addCandidateBtn = document.getElementById('add-candidate-btn');
+    if (addCandidateBtn) {
+        addCandidateBtn.onclick = async function(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('new-candidate-name');
             const fileInput = document.getElementById('new-candidate-file');
-            const selectedFile = fileInput?.files?.[0];
+            const photoInput = document.getElementById('new-candidate-photo');
+            const genderInput = document.getElementById('new-candidate-gender');
 
-            if (!name || (!photoInputValue && !selectedFile)) {
-                alert("Erreur : Veuillez attribuer un nom et une image valide (URL ou fichier)." );
+            const name = nameInput ? nameInput.value.trim() : '';
+            const selectedFile = fileInput?.files?.[0];
+            let photoUrl = photoInput ? photoInput.value.trim() : '';
+            const gender = genderInput ? genderInput.value : 'M';
+
+            if (!name) {
+                alert("Veuillez saisir un nom pour le candidat.");
                 return;
             }
 
-            addBtn.textContent = 'Envoi en cours...';
-
             try {
-                let photo = photoInputValue;
                 if (selectedFile) {
-                    photo = await new Promise((resolve, reject) => {
+                    photoUrl = await new Promise((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onload = () => resolve(reader.result);
-                        reader.onerror = () => reject(new Error('Impossible de lire le fichier sélectionné.'));
+                        reader.onerror = () => reject(new Error('Erreur de lecture du fichier.'));
                         reader.readAsDataURL(selectedFile);
                     });
+                }
+
+                if (!photoUrl) {
+                    alert("Veuillez choisir une photo à importer ou coller une URL.");
+                    return;
                 }
 
                 const response = await fetch(`${API_URL}/participants`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, photo, gender })
+                    body: JSON.stringify({ name, photo: photoUrl, gender })
                 });
 
                 const data = await response.json();
 
-                if (data.success) {
+                if (data.success || response.ok) {
                     alert(`Succès : Le candidat "${name}" a été ajouté.`);
-                    document.getElementById('new-candidate-name').value = '';
-                    document.getElementById('new-candidate-photo').value = '';
+                    if (nameInput) nameInput.value = '';
                     if (fileInput) fileInput.value = '';
+                    if (photoInput) photoInput.value = '';
                     await loadData();
                     renderParticipantManagement();
                     populateParticipantSelector();
                 }
             } catch (error) {
-                alert("Erreur lors de l'ajout sur le serveur.");
-            } finally {
-                addBtn.textContent = '➕ Ajouter le candidat';
+                alert("Erreur lors de l'enregistrement du candidat.");
             }
         };
     }
 
-    const addRadioItemBtn = document.getElementById('add-radio-item-btn');
-    if (addRadioItemBtn) {
-        addRadioItemBtn.onclick = async function() {
+    const addRadioBtn = document.getElementById('add-radio-item-btn');
+    if (addRadioBtn) {
+        addRadioBtn.onclick = async function(e) {
+            e.preventDefault();
             const textInput = document.getElementById('new-radio-item-text');
-            const text = textInput?.value.trim();
-            if (!text) {
-                alert('Veuillez saisir une information avant de l’ajouter à la radio couloir.');
-                return;
-            }
+            const text = textInput ? textInput.value.trim() : '';
+
+            if (!text) return;
+
             const items = await loadRadioItems();
             const nextItems = [...items, { id: 'radio-' + Date.now(), text }];
             await saveRadioItems(nextItems);
             textInput.value = '';
             await renderRadioItemsAdmin();
-            alert('Information ajoutée à la radio couloir.');
+            alert('Annonce diffusée sur Radio Couloir !');
         };
     }
 
     const saveCfgBtn = document.getElementById('save-cfg-btn');
     if (saveCfgBtn) {
         saveCfgBtn.onclick = async function() {
-            clashContent.title = document.getElementById('cfg-clash-title').value.trim() || defaultClashContent.title;
-            clashContent.description = document.getElementById('cfg-clash-desc').value.trim() || defaultClashContent.description;
-            clashContent.summaryLeftTitle = document.getElementById('cfg-left-title').value.trim() || defaultClashContent.summaryLeftTitle;
-            clashContent.summaryLeftText = document.getElementById('cfg-left-text').value.trim() || defaultClashContent.summaryLeftText;
+            const titleInput = document.getElementById('cfg-clash-title');
+            const descInput = document.getElementById('cfg-clash-desc');
+
+            if (titleInput) clashContent.title = titleInput.value.trim();
+            if (descInput) clashContent.description = descInput.value.trim();
 
             try {
                 await saveLocalConfig();
-                alert("Les modifications de contenu ont été appliquées !");
+                alert('Configuration mise à jour avec succès !');
             } catch (error) {
-                console.error('Échec de sauvegarde du contenu:', error);
-                alert('Échec de la sauvegarde du contenu.');
+                alert('Erreur lors de la mise à jour de la configuration.');
             }
         };
     }
 }
 
-// Initialisation dès le chargement de la page
+// Initialisation au chargement du DOM
 document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
     initSecurity();

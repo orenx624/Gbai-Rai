@@ -265,7 +265,7 @@ async function renderClashPage() {
         el('cancel-right')?.addEventListener('click', () => closeBubble('right'));
         closeBottom?.addEventListener('click', () => bottomViewer?.classList.add('hidden'));
         nextBtn?.addEventListener('click', goNext);
-        el('admin-open')?.addEventListener('click', () => { window.location.href = 'admin.html'; });
+        // admin button handled globally via setupAdminButtons()
         clashState.initialized = true;
     }
 
@@ -382,9 +382,42 @@ function updatePageViews() {
 // -----------------------------------------------------------------------
 // INITIALISATION
 // -----------------------------------------------------------------------
+function updateAdminButtons() {
+    const isActive = localStorage.getItem('admin_session') === 'active';
+    const loginBtn = document.getElementById('admin-login');
+    const logoutBtn = document.getElementById('admin-logout');
+    if (isActive) {
+        loginBtn?.classList.add('hidden');
+        logoutBtn?.classList.remove('hidden');
+    } else {
+        loginBtn?.classList.remove('hidden');
+        logoutBtn?.classList.add('hidden');
+    }
+}
+
+function setupAdminButtons() {
+    updateAdminButtons();
+    const loginBtn = document.getElementById('admin-login');
+    const logoutBtn = document.getElementById('admin-logout');
+    loginBtn?.addEventListener('click', () => { window.location.href = 'admin.html'; });
+    logoutBtn?.addEventListener('click', () => {
+        localStorage.removeItem('admin_session');
+        updateAdminButtons();
+        location.reload();
+    });
+}
+function initRadioCouloir() {
+    const radioTextEl = document.getElementById('radio-couloir-text');
+    if (!radioTextEl) return;
+
+    renderRadioCouloir();
+    updatePageViews();
+}
+
 async function initApp() {
+    setupAdminButtons();
     if (document.querySelector('.duel-content'))       await renderClashPage();
-    if (document.getElementById('radio-couloir-text')) { await renderRadioCouloir(); updatePageViews(); }
+    if (document.getElementById('radio-couloir-text')) await initRadioCouloir();
     if (document.getElementById('leaderboard-list'))   await renderClassementPage();
 }
 

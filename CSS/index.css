@@ -14,6 +14,12 @@
     margin: 0 auto;
 }
 
+/* Admin buttons in header: consistent spacing */
+.header-actions .btn-admin {
+    padding: 0.45rem 0.8rem;
+    min-width: 120px;
+}
+
 .web-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -140,3 +146,228 @@
 }
 
 .news-item:last-child { border-bottom: none; }
+
+/* --- NOUVEAUX STYLES POUR LA GRILLE DE L'ACCUEIL --- */
+
+/* Style du Titre App */
+.app-title {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 50%, #ef4444 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* UNIFORMISATION DE LA GRILLE D'ACCUEIL */
+.activities-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.card {
+    border-radius: 18px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    min-height: 135px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    position: relative;
+}
+.card:active {
+    transform: scale(0.98);
+}
+
+.card .card-icon,
+.card .badge,
+.card .card-title,
+.card .card-desc,
+.card .card-action {
+    pointer-events: none;
+}
+
+/* Couleurs des cartes */
+.card-teal { background-color: #134e4a; }
+.card-purple { background-color: #4a1d4a; }
+.card-blue { background-color: #123952; }
+.card-green { background-color: #124218; }
+.card-red { background-color: #5c1818; }
+.card-amber { background-color: #5a4112; }
+
+/* Header de Carte & Badges */
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.card-icon { font-size: 20px; }
+
+.badge {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 10px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+.badge-live { background-color: #e11d48; }
+.badge-spicy { background-color: #a855f7; }
+.badge-info { background-color: #0284c7; }
+.badge-new { background-color: #16a34a; }
+.badge-anonyme { background-color: #e11d48; }
+.badge-utile { background-color: #b45309; }
+
+.card-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.card-desc {
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.3;
+}
+
+.card-action {
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Style spécifique pour la carte sur radio.html */
+.radio-full-card {
+    min-height: 250px;
+    padding: 20px;
+    margin-top: 15px;
+}
+
+/* --- STYLES GENERAUX DES NOUVELLES PAGES --- */
+.section-title {
+    font-size: 18px;
+    margin: 20px 0 12px 0;
+    color: #ffffff;
+}
+
+.custom-input {
+    width: 100%;
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 12px;
+    color: #ffffff;
+    font-size: 14px;
+    resize: none;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+.custom-input:focus { outline: 1px solid #ef4444; }
+
+.btn-primary {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* GAZETTE */
+.alert-banner {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid #ef4444;
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: #fca5a5;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+.article-card {
+    background-color: #1e293b;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+}
+.article-card h3 { margin: 8px 0; font-size: 16px; color: #fff; }
+.article-card p { font-size: 13px; color: #94a3b8; line-height: 1.4; }
+.article-meta { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; }
+.article-footer { display: flex; justify-content: space-between; margin-top: 12px; font-size: 12px; color: #94a3b8; }
+.read-more { color: #38bdf8; text-decoration: none; font-weight: 700; }
+
+/* SONDAGES */
+.poll-card, .create-poll-card {
+    background-color: #124218;
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+.poll-header { display: flex; justify-content: space-between; align-items: center; }
+.poll-timer { font-size: 12px; color: #86efac; }
+.poll-question { font-size: 16px; margin: 12px 0; color: #fff; }
+.poll-options { display: flex; flex-direction: column; gap: 8px; }
+.poll-option-btn {
+    position: relative;
+    background-color: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden;
+    cursor: pointer;
+}
+.option-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    background-color: rgba(34, 197, 94, 0.3);
+    z-index: 1;
+}
+.option-label, .option-percent { position: relative; z-index: 2; font-size: 13px; font-weight: 600; }
+.poll-footer { font-size: 12px; color: #86efac; margin-top: 12px; }
+
+/* CONFESSIONS */
+.confess-box { background-color: #5c1818; border-radius: 18px; padding: 16px; margin-bottom: 20px; }
+.confess-box h2 { font-size: 15px; margin-bottom: 10px; color: #fff; }
+.confess-actions { display: flex; justify-content: space-between; gap: 10px; }
+.category-select { background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 10px; padding: 8px; font-size: 12px; }
+.confession-card { background-color: #1e293b; border-radius: 16px; padding: 16px; margin-bottom: 14px; }
+.confession-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #94a3b8; }
+.confession-text { font-size: 14px; color: #f1f5f9; line-height: 1.4; }
+.confession-reactions { display: flex; gap: 8px; margin-top: 12px; }
+.react-btn { background: #0f172a; border: none; color: #94a3b8; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; }
+
+/* COMMENTS UI */
+.comments-section { margin-top: 14px; border-top: 1px solid #334155; padding-top: 10px; }
+.comment { font-size: 12px; margin-bottom: 6px; color: #cbd5e1; }
+.comment strong { color: #f43f5e; }
+.add-comment { display: flex; gap: 6px; margin-top: 8px; }
+.comment-input { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 6px 10px; color: #fff; font-size: 12px; }
+
+/* ANNONCES */
+.filter-pills { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 16px; padding-bottom: 4px; }
+.pill { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 20px; font-size: 12px; white-space: nowrap; cursor: pointer; }
+.pill.active { background: #b45309; color: #fff; border-color: #f59e0b; }
+.annonces-grid { display: flex; flex-direction: column; gap: 12px; }
+.annonce-card { background-color: #5a4112; border-radius: 16px; padding: 16px; }
+.annonce-top { display: flex; justify-content: space-between; align-items: center; }
+.annonce-price { font-weight: 800; color: #fbbf24; font-size: 14px; }
+.annonce-title { font-size: 15px; margin: 8px 0 4px 0; color: #fff; }
+.annonce-desc { font-size: 12px; color: #cbd5e1; line-height: 1.3; }
+.annonce-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+.btn-whatsapp { background-color: #25d366; color: #fff; border: none; border-radius: 10px; padding: 8px 12px; font-size: 11px; font-weight: 700; cursor: pointer; }

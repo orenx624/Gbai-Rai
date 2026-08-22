@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration Radio Couloir - Gbai-Rai</title>
+    <link rel="stylesheet" href="CSS/common.css">
+    <link rel="stylesheet" href="CSS/index.css">
+    <link rel="stylesheet" href="CSS/admin.css">
+    <script src="JS/auth-guard.js"></script>
+    <script src="JS/admin-console.js"></script>
+</head>
+<body class="page-admin-radio">
+    <header class="site-header" id="admin-header">
+        <div class="logo-wrapper">
+            <a href="admin.html" class="back-link" aria-label="Retour à la console" title="Retour à la console">←</a>
+            <div class="logo">Gbai<span>-</span>Rai <small style="font-size: 0.6em; color: var(--red);">[Admin Radio Couloir]</small></div>
+        </div>
+        <nav class="site-nav">
+            <a href="index.html">Accueil</a>
+            <a href="admin.html">Console Admin</a>
+        </nav>
+    </header>
+
+    <main class="container" style="margin-top: 2rem;">
+        <section id="radio-settings" class="admin-section">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>📢 Radio Couloir</h2>
+            </div>
+            <div class="section-body" style="display: grid; gap: 0.8rem; margin-top: 1rem;">
+                <div class="card admin-panel-card admin-card-section">
+                    <div style="display: grid; gap: 0.8rem; margin-top: 0.5rem;">
+                        <textarea id="new-radio-item-text" rows="3" placeholder="Écrivez une nouvelle information..." style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: #fff; resize: vertical;"></textarea>
+                        <button id="add-radio-item-btn" class="btn btn-secondary" style="font-weight: bold; padding: 0.8rem;">Ajouter à la Radio</button>
+                        <div id="radio-items-list" style="display: grid; gap: 0.6rem; margin-top: 0.5rem;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="JS/admin-console.js"></script>
+</body>
+</html>

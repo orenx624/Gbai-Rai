@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio Couloir - Gbai-Rai</title>
+    <link rel="stylesheet" href="CSS/common.css">
+    <link rel="stylesheet" href="CSS/index.css">
+</head>
+<body class="page-radio">
+    <header class="site-header">
+        <div class="logo-wrapper">
+            <a href="index.html" class="back-link" aria-label="Retour à l'accueil" title="Retour">←</a>
+            <h1 class="app-title">Radio<span>-</span>Couloir</h1>
+        </div>
+        <nav class="site-nav">
+            <a href="index.html">Accueil</a>
+            <a href="clash.html">Clashs</a>
+            <a href="classement.html">Classement<sup>2</sup></a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="welcome-box">
+            <h1>🤫 Radio Couloir</h1>
+            <p>Les dernières rumeurs et potins anonymes en direct du campus.</p>
+        </div>
+
+        <!-- BLOC DE LECTURE DES RUMEURS -->
+        <div class="card card-purple radio-full-card">
+            <div class="card-top">
+                <span class="card-icon">📻</span>
+                <span class="badge badge-spicy">En Direct</span>
+            </div>
+            
+            <div class="rumor-content">
+                <p id="radio-couloir-text">Chargement des infos...</p>
+                <div class="radio-footer">
+                    <span id="radio-couloir-counter" class="radio-counter">0 / 0</span>
+                </div>
+            </div>
+
+            <div class="card-footer-interactive">
+                <span class="views-text">👀 <span id="view-count">1420</span> vus</span>
+                <div class="actions">
+                    <button class="btn-sub" data-action="info">💯 Info</button>
+                    <button class="btn-sub" data-action="intox">❌ Intox</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="JS/a.js"></script>
+</body>
+</html>
