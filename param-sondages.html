@@ -22,7 +22,6 @@
 
     <main class="container">
         <div class="admin-welcome">
-            
             <h2>📊 Gestion des Sondages Flash</h2>
             <p>Créez de nouveaux sondages à options multiples, suivez les votes en direct et gérez vos publications.</p>
         </div>
@@ -57,8 +56,16 @@
             </form>
         </div>
 
+        <!-- Section des propositions du public -->
+        <div class="admin-card list-card" style="margin-top: 2rem;">
+            <h3>💡 Idées de sondages proposées par les visiteurs</h3>
+            <div id="propositions-list" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.8rem;">
+                <!-- Les propositions seront injectées dynamiquement ici -->
+            </div>
+        </div>
+
         <!-- Liste des sondages en cours -->
-        <div class="admin-card list-card">
+        <div class="admin-card list-card" style="margin-top: 2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
                 <h3 style="margin-bottom: 0;">Sondages actifs & Résultats</h3>
                 <button class="btn-danger-all" id="btn-delete-all-sondages" title="Supprimer tous les sondages d'un coup">🗑️ Tout supprimer</button>
