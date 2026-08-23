@@ -21,16 +21,18 @@
     </header>
 
     <main class="container">
-        <div class="alert-banner">
+        <!-- Alerte Flash dynamique -->
+        <div class="alert-banner" id="alert-banner">
             <span class="alert-icon">🚨</span>
-            <div>
+            <div id="alert-content">
                 <strong>Alerte Flash Admin :</strong> Modification du calendrier des examens de fin de semestre disponible.
             </div>
         </div>
 
         <h2 class="section-title">📰 Dernières Actualités</h2>
 
-        <div class="articles-list">
+        <!-- Conteneur des articles dynamiques -->
+        <div class="articles-list" id="articles-container">
             <article class="article-card">
                 <div class="article-meta">
                     <span class="badge badge-info">Événement</span>
@@ -58,5 +60,7 @@
             </article>
         </div>
     </main>
+
+    <script src="JS/gazette.js"></script>
 </body>
 </html>

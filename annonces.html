@@ -21,14 +21,16 @@
     </header>
 
     <main class="container">
-        <div class="filter-pills">
-            <button class="pill active">Tout</button>
-            <button class="pill">🛒 Vente</button>
-            <button class="pill">🏠 Logement</button>
-            <button class="pill">🛠️ Services</button>
+        <!-- Filtres dynamiques -->
+        <div class="filter-pills" id="annonces-filters">
+            <button class="pill active" data-filter="all">Tout</button>
+            <button class="pill" data-filter="vente">🛒 Vente</button>
+            <button class="pill" data-filter="logement">🏠 Logement</button>
+            <button class="pill" data-filter="services">🛠️ Services</button>
         </div>
 
-        <div class="annonces-grid">
+        <!-- Grille dynamique des annonces -->
+        <div class="annonces-grid" id="annonces-grid-container">
             <div class="annonce-card">
                 <div class="annonce-top">
                     <span class="annonce-category">🛒 Vente</span>
@@ -56,5 +58,7 @@
             </div>
         </div>
     </main>
+
+    <script src="JS/annonces.js"></script>
 </body>
 </html>

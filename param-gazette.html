@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Param - Gazette du Campus - Gbai-Rai</title>
+    <link rel="stylesheet" href="CSS/common.css">
+    <link rel="stylesheet" href="CSS/admin.css">
+    <link rel="stylesheet" href="CSS/param-gazette.css">
+</head>
+<body class="admin-page">
+    <header class="site-header">
+        <div class="logo-wrapper">
+            <a href="admin.html" class="back-link" aria-label="Retour">←</a>
+            <h1 class="app-title">Gbai-Rai <span class="admin-tag">[Param - Gazette]</span></h1>
+        </div>
+        <nav class="site-nav">
+            <a href="admin.html">Tableau de bord</a>
+            <a href="index.html" target="_blank">Voir le site</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="admin-welcome">
+            <h2>📰 Gestion de la Gazette</h2>
+            <p>Ajoutez, modifiez ou supprimez les alertes et actualités publiées sur le campus.</p>
+        </div>
+
+        <!-- Formulaire d'ajout / modification -->
+        <div class="admin-card form-card">
+            <h3>Publier une nouvelle alerte</h3>
+            <form id="param-gazette-form">
+                <div class="form-group">
+                    <label for="gazette-title">Titre de l'alerte</label>
+                    <input type="text" id="gazette-title" class="custom-input" placeholder="Ex: Communiqué officiel examens..." required>
+                </div>
+                <div class="form-group">
+                    <label for="gazette-desc">Contenu / Description</label>
+                    <textarea id="gazette-desc" class="custom-input" placeholder="Détails de l'actualité..." required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gazette-badge">Type de badge</label>
+                        <select id="gazette-badge" class="custom-input">
+                            <option value="Urgent">Urgent</option>
+                            <option value="Info">Info</option>
+                            <option value="Rumeur">Rumeur</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Publier dans la Gazette</button>
+            </form>
+        </div>
+
+        <!-- Liste des éléments existants avec option de suppression globale -->
+        <div class="admin-card list-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                <h3 style="margin-bottom: 0;">Articles publiés</h3>
+                <button class="btn-danger-all" id="btn-delete-all-gazette" title="Supprimer tous les articles d'un coup">🗑️ Tout supprimer</button>
+            </div>
+
+            <div class="admin-items-list" id="param-gazette-list">
+                <div class="admin-item-row">
+                    <div class="item-info">
+                        <span class="badge badge-info">Info</span>
+                        <strong>Modification des horaires de la bibliothèque</strong>
+                        <p class="item-subtext">La bibliothèque fermera exceptionnellement à 20h cette semaine.</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-icon btn-edit" title="Modifier">✏️</button>
+                        <button class="btn-icon btn-delete" title="Supprimer">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="JS/param-gazette.js"></script>
+</body>
+</html>

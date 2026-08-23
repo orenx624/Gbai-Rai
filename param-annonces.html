@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Param - Petites Annonces - Gbai-Rai</title>
+    <link rel="stylesheet" href="CSS/common.css">
+    <link rel="stylesheet" href="CSS/admin.css">
+    <link rel="stylesheet" href="CSS/param-annonces.css">
+</head>
+<body class="admin-page">
+    <header class="site-header">
+        <div class="logo-wrapper">
+            <a href="admin.html" class="back-link" aria-label="Retour">←</a>
+            <h1 class="app-title">Gbai-Rai <span class="admin-tag">[Param - Annonces]</span></h1>
+        </div>
+        <nav class="site-nav">
+            <a href="admin.html">Tableau de bord</a>
+            <a href="index.html" target="_blank">Voir le site</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="admin-welcome">
+            <h2>🛒 Gestion des Petites Annonces</h2>
+            <p>Publiez de nouvelles annonces officielles pour le campus et gérez le flux existant.</p>
+        </div>
+
+        <!-- Formulaire de publication par l'administrateur -->
+        <div class="admin-card form-card">
+            <h3>Publier une nouvelle annonce</h3>
+            <form id="param-annonce-form">
+                <div class="form-group">
+                    <label for="annonce-title">Titre de l'annonce</label>
+                    <input type="text" id="annonce-title" class="custom-input" placeholder="Ex: Calculatrice Scientifique Casio..." required>
+                </div>
+                <div class="form-group">
+                    <label for="annonce-desc">Description / Détails</label>
+                    <textarea id="annonce-desc" class="custom-input" placeholder="État du produit, contact, lieu de récupération..." required></textarea>
+                </div>
+                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.2rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="annonce-category">Catégorie</label>
+                        <select id="annonce-category" class="custom-input">
+                            <option value="Vente">🛒 Vente</option>
+                            <option value="Logement">🏠 Logement</option>
+                            <option value="Services">🛠️ Services</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="annonce-price">Prix ou Loyer</label>
+                        <input type="text" id="annonce-price" class="custom-input" placeholder="Ex: 15.000 FCFA" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Diffuser l'annonce</button>
+            </form>
+        </div>
+
+        <!-- Liste des annonces actives avec option de suppression globale -->
+        <div class="admin-card list-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                <h3 style="margin-bottom: 0;">Annonces actives sur le campus</h3>
+                <button class="btn-danger-all" id="btn-delete-all-annonces" title="Supprimer toutes les annonces d'un coup">🗑️ Tout supprimer</button>
+            </div>
+            
+            <div class="admin-items-list" id="param-annonces-active">
+                <div class="admin-item-row">
+                    <div class="item-info">
+                        <span class="badge badge-vente">🛒 Vente</span>
+                        <strong>Calculatrice Scientifique Casio</strong>
+                        <p class="item-subtext">Prix : 15.000 FCFA • Très bon état, peu utilisée.</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-icon btn-delete" title="Supprimer l'annonce">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

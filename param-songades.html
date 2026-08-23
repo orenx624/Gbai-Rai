@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Param - Sondages Flash - Gbai-Rai</title>
+    <link rel="stylesheet" href="CSS/common.css">
+    <link rel="stylesheet" href="CSS/admin.css">
+    <link rel="stylesheet" href="CSS/param-sondages.css">
+</head>
+<body class="admin-page">
+    <header class="site-header">
+        <div class="logo-wrapper">
+            <a href="admin.html" class="back-link" aria-label="Retour">←</a>
+            <h1 class="app-title">Gbai-Rai <span class="admin-tag">[Param - Sondages]</span></h1>
+        </div>
+        <nav class="site-nav">
+            <a href="admin.html">Tableau de bord</a>
+            <a href="index.html" target="_blank">Voir le site</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="admin-welcome">
+            <h2>📊 Gestion des Sondages Flash</h2>
+            <p>Créez de nouveaux sondages à options multiples, suivez les votes en direct et gérez vos publications.</p>
+        </div>
+
+        <!-- Formulaire de création de sondage dynamique -->
+        <div class="admin-card form-card">
+            <h3>Lancer un nouveau sondage</h3>
+            <form id="param-sondages-form">
+                <div class="form-group">
+                    <label for="sondage-question">Question du sondage</label>
+                    <input type="text" id="sondage-question" class="custom-input" placeholder="Ex: Quel est le meilleur département à l'ENEAM ?" required>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <label style="margin-bottom: 0;">Options de vote</label>
+                        <button type="button" class="btn-secondary-sm" id="btn-add-option">➕ Ajouter une option</button>
+                    </div>
+                    
+                    <!-- Conteneur dynamique des options -->
+                    <div id="options-container" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                        <div class="option-row" style="display: flex; gap: 0.5rem;">
+                            <input type="text" class="custom-input option-input" placeholder="Option 1 (ex: Informatique de Gestion)" required>
+                        </div>
+                        <div class="option-row" style="display: flex; gap: 0.5rem;">
+                            <input type="text" class="custom-input option-input" placeholder="Option 2 (ex: Finance et Comptabilité)" required>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" style="margin-top: 1rem;">Publier le sondage</button>
+            </form>
+        </div>
+
+        <!-- Liste des sondages en cours -->
+        <div class="admin-card list-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                <h3 style="margin-bottom: 0;">Sondages actifs & Résultats</h3>
+                <button class="btn-danger-all" id="btn-delete-all-sondages" title="Supprimer tous les sondages d'un coup">🗑️ Tout supprimer</button>
+            </div>
+
+            <div class="admin-items-list" id="param-sondages-list">
+                <!-- Les sondages seront injectés dynamiquement ici par JS -->
+            </div>
+        </div>
+    </main>
+
+    <script src="JS/param-sondages.js"></script>
+</body>
+</html>

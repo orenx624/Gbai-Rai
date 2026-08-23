@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Param - Confessions - Gbai-Rai</title>
+    <link rel="stylesheet" href="CSS/common.css">
+    <link rel="stylesheet" href="CSS/admin.css">
+    <link rel="stylesheet" href="CSS/param-confessions.css">
+</head>
+<body class="admin-page">
+    <header class="site-header">
+        <div class="logo-wrapper">
+            <a href="admin.html" class="back-link" aria-label="Retour">←</a>
+            <h1 class="app-title">Gbai-Rai <span class="admin-tag">[Param - Confessions]</span></h1>
+        </div>
+        <nav class="site-nav">
+            <a href="admin.html">Tableau de bord</a>
+            <a href="index.html" target="_blank">Voir le site</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="admin-welcome">
+            <h2>🎭 Modération des Confessions</h2>
+            <p>Examinez, validez ou supprimez les secrets soumis anonymement par les étudiants.</p>
+        </div>
+
+        <!-- Section de modération des soumissions en attente -->
+        <div class="admin-card list-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                <h3 style="margin-bottom: 0;">Confessions en attente de modération</h3>
+                <button class="btn-danger-all" id="btn-delete-all-pending" title="Tout rejeter d'un coup">🗑️ Tout rejeter</button>
+            </div>
+            
+            <div class="admin-items-list" id="param-confessions-pending">
+                <div class="admin-item-row">
+                    <div class="item-info">
+                        <span class="badge badge-anonyme">Amour & Crush</span>
+                        <strong>#Confession 305</strong>
+                        <p class="item-subtext">"J'avoue que je regarde toujours si la personne assise au dernier rang me remarque..."</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-icon btn-approve" title="Approuver">✅</button>
+                        <button class="btn-icon btn-delete" title="Rejeter / Supprimer">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des confessions déjà publiées -->
+        <div class="admin-card list-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                <h3 style="margin-bottom: 0;">Confessions actives sur le mur</h3>
+                <button class="btn-danger-all" id="btn-delete-all-active" title="Retirer toutes les confessions du site">🗑️ Tout supprimer</button>
+            </div>
+
+            <div class="admin-items-list" id="param-confessions-active">
+                <div class="admin-item-row">
+                    <div class="item-info">
+                        <span class="badge badge-anonyme">Examens & Profs</span>
+                        <strong>#Confession 304</strong>
+                        <p class="item-subtext">"Le prof de maths a dit qu'il allait corser l'épreuve de rattrapage, préparez-vous bien !"</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-icon btn-delete" title="Retirer du site">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="JS/param-confessions.js"></script>
+</body>
+</html>

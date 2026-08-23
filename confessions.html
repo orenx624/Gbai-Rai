@@ -23,20 +23,21 @@
     <main class="container">
         <div class="confess-box">
             <h2>🎭 Libère ton secret (100% Anonyme)</h2>
-            <textarea class="custom-input" placeholder="Écris ta confession ici sans crainte..."></textarea>
+            <textarea class="custom-input" id="confession-input" placeholder="Écris ta confession ici sans crainte..."></textarea>
             <div class="confess-actions">
-                <select class="category-select">
+                <select class="category-select" id="confession-category">
                     <option>🔥 Amour & Crush</option>
                     <option>📚 Examens & Profs</option>
                     <option>🤫 Secret Brut</option>
                 </select>
-                <button class="btn-primary">Publier</button>
+                <button class="btn-primary" id="submit-confession-btn">Publier</button>
             </div>
         </div>
 
         <h2 class="section-title">🔥 Confessions Recentes</h2>
 
-        <div class="confessions-feed">
+        <!-- Conteneur dynamique du flux de confessions -->
+        <div class="confessions-feed" id="confessions-feed-container">
             <div class="confession-card">
                 <div class="confession-header">
                     <span class="confession-id">#Confession 304</span>
@@ -65,5 +66,7 @@
             </div>
         </div>
     </main>
+
+    <script src="JS/confessions.js"></script>
 </body>
 </html>
