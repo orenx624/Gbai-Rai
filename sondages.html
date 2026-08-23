@@ -22,48 +22,21 @@
 
     <main class="container">
         <div class="welcome-box">
-            <h1>📊 Sondage Actif du Jour</h1>
+            <h1>📊 Sondages Flash</h1>
             <p>Vote anonymement et découvre les tendances en direct.</p>
         </div>
 
-        <!-- Conteneur dynamique du sondage -->
-        <div class="poll-card" id="active-poll-container">
-            <div class="poll-header">
-                <span class="badge badge-live">En cours</span>
-                <span class="poll-timer" id="poll-timer">⏱️ Finit dans 4h</span>
-            </div>
-            <h3 class="poll-question" id="poll-question">Combien d'heures dormez-vous par nuit pendant les révisions ?</h3>
-            
-            <div class="poll-options" id="poll-options-container">
-                <div class="poll-option-btn" data-index="0">
-                    <div class="option-fill" style="width: 15%;"></div>
-                    <span class="option-label">Moins de 4 heures</span>
-                    <span class="option-percent">15%</span>
-                </div>
-
-                <div class="poll-option-btn voted" data-index="1">
-                    <div class="option-fill" style="width: 58%;"></div>
-                    <span class="option-label">Entre 4h et 6h</span>
-                    <span class="option-percent">58%</span>
-                </div>
-
-                <div class="poll-option-btn" data-index="2">
-                    <div class="option-fill" style="width: 27%;"></div>
-                    <span class="option-label">Plus de 7 heures (Les rois)</span>
-                    <span class="option-percent">27%</span>
-                </div>
-            </div>
-
-            <div class="poll-footer">
-                <span id="poll-votes-count">🗳️ 482 votes enregistrés</span>
-            </div>
-        </div>
-
-        <div class="create-poll-card">
+        <!-- 1. Zone de proposition placée EN HAUT -->
+        <div class="create-poll-card" style="margin-bottom: 2rem;">
             <h3>💡 Une idée de sondage ?</h3>
             <p>Propose ta question, elle sera validée puis mise au vote.</p>
             <textarea class="custom-input" id="new-poll-input" placeholder="Écris ta question ici..."></textarea>
             <button class="btn-primary" id="submit-poll-btn">Proposer mon sondage</button>
+        </div>
+
+        <!-- 2. Conteneur dynamique qui recevra TOUS les sondages -->
+        <div id="polls-list-container">
+            <!-- Injecté dynamiquement par JS -->
         </div>
     </main>
 
