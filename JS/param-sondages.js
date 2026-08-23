@@ -1,3 +1,5 @@
+const API_URL = 'https://gbai-rai-backend.vercel.app';
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchSondages();
 
@@ -48,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch('/api/sondages', {
+                const response = await fetch(`${API_URL}/api/sondages`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ question, options })
@@ -84,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!confirm('Voulez-vous vraiment supprimer TOUS les sondages ?')) return;
 
             try {
-                const response = await fetch('/api/sondages', { method: 'DELETE' });
+                const response = await fetch(`${API_URL}/api/sondages`, { method: 'DELETE' });
                 if (response.ok) {
                     fetchSondages();
                 } else {
@@ -100,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Fonction pour récupérer et afficher les sondages
 async function fetchSondages() {
     try {
-        const response = await fetch('/api/sondages');
+        const response = await fetch(`${API_URL}/api/sondages`);
         const result = await response.json();
         const container = document.getElementById('param-sondages-list');
         if (!container) return;
@@ -141,7 +143,7 @@ async function deleteSondage(id) {
     if (!confirm('Voulez-vous vraiment supprimer ce sondage ?')) return;
 
     try {
-        const response = await fetch(`/api/sondages/${id}`, { method: 'DELETE' });
+        const response = await fetch(`${API_URL}/api/sondages/${id}`, { method: 'DELETE' });
         if (response.ok) {
             fetchSondages();
         } else {
@@ -151,4 +153,3 @@ async function deleteSondage(id) {
         console.error('Erreur réseau :', error);
     }
 }
-
