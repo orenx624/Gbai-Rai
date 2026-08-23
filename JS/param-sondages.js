@@ -2,6 +2,7 @@ const API_URL = 'https://gbai-rai-backend.vercel.app';
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchSondages();
+    fetchPropositions();
 
     // Gestion de l'ajout dynamique d'options dans le formulaire
     const btnAddOption = document.getElementById('btn-add-option');
@@ -99,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Fonction pour récupérer et afficher les sondages
+// 1. Récupérer et afficher les sondages officiels
 async function fetchSondages() {
     try {
         const response = await fetch(`${API_URL}/api/sondages`);
@@ -117,7 +118,6 @@ async function fetchSondages() {
         }
 
         sondages.forEach(sondage => {
-            // Calculer le total des votes de toutes les options
             const totalVotes = sondage.options ? sondage.options.reduce((sum, opt) => sum + (opt.votes || 0), 0) : 0;
 
             const row = document.createElement('div');
@@ -135,6 +135,74 @@ async function fetchSondages() {
         });
     } catch (error) {
         console.error('Erreur lors du chargement des sondages :', error);
+    }
+}
+
+// 2. Récupérer et afficher les propositions soumises par les visiteurs
+async function fetchPropositions() {
+    const container = document.getElementById('propositions-list');
+    if (!container) return;
+
+    try {
+        const response = await fetch(`${API_URL}/api/admin/propositions`);
+        const result = await response.json();
+
+        container.innerHTML = '';
+
+        if (!result.success || !result.data || result.data.length === 0) {
+            container.innerHTML = '<p class="item-subtext" style="text-align: center; padding: 0.5rem;">Aucune proposition en attente.</p>';
+            return;
+        }
+
+        result.data.forEach(prop => {
+            const row = document.createElement('div');
+            row.className = 'admin-item-row';
+            row.style.background = 'rgba(255, 255, 255, 0.03)';
+            row.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+
+            const dateStr = prop.createdAt ? new Date(prop.createdAt).toLocaleString('fr-FR') : '';
+
+            row.innerHTML = `
+                <div class="item-info">
+                    <strong>${prop.question}</strong>
+                    <p class="item-subtext">Reçue le : ${dateStr}</p>
+                </div>
+                <div class="item-actions" style="display: flex; gap: 0.5rem;">
+                    <button class="btn-secondary-sm" onclick="useProposition('${encodeURIComponent(prop.question)}')" title="Utiliser cette question">✏️ Charger</button>
+                    <button class="btn-icon btn-delete" onclick="deleteProposition('${prop.id}')" title="Rejeter">🗑️</button>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Erreur chargement propositions :', error);
+    }
+}
+
+// Charger une proposition directement dans le champ du formulaire
+function useProposition(encodedQuestion) {
+    const question = decodeURIComponent(encodedQuestion);
+    const input = document.getElementById('sondage-question');
+    if (input) {
+        input.value = question;
+        input.focus();
+        window.scrollTo({ top: input.offsetTop - 100, behavior: 'smooth' });
+    }
+}
+
+// Supprimer une proposition de la file d'attente
+async function deleteProposition(id) {
+    if (!confirm('Voulez-vous supprimer cette proposition ?')) return;
+
+    try {
+        const response = await fetch(`${API_URL}/api/admin/propositions/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            fetchPropositions();
+        } else {
+            alert('Erreur lors de la suppression.');
+        }
+    } catch (error) {
+        console.error('Erreur réseau :', error);
     }
 }
 
