@@ -4,7 +4,6 @@
 // Ce fichier ne contient que de la présentation et des appels API.
 // =======================================================================
                                                                                                                                     
-const API_BASE = 'https://gbai-rai-backend-x.vercel.app/api';
 let viewCount = 1420;
 
 const clashState = {
@@ -32,11 +31,8 @@ function shuffleArray(items) {
 }
 
 async function requestJson(path, options = {}) {
-    const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
-    const res = await fetch(url, options);
-    const text = await res.text();
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return text ? JSON.parse(text) : null;
+    const { cache = true, ...requestOptions } = options;
+    return gbaiRequest(path, requestOptions, cache);
 }
 
 function createCommentItem(comment) {
@@ -64,11 +60,11 @@ function buildRoundRobinPairs(participants) {
 // -----------------------------------------------------------------------
 // PAGE CLASH
 // -----------------------------------------------------------------------
-async function renderClashPage() {
+async function renderClashPage(forceRefresh = false) {
     // Chargement des participants depuis le backend
     try {
-        const data = await requestJson('/participants');
-        clashState.participants = Array.isArray(data) ? data : (data?.participants || []);
+        const data = await requestJson('/participants', { cache: !forceRefresh });
+        clashState.participants = Array.isArray(data) ? data : (data?.participants || data?.data || []);
     } catch (e) {
         console.warn('Backend inaccessible, données indisponibles.', e);
         clashState.participants = [];
@@ -284,15 +280,16 @@ function getRadioDuration(text) {
     return Math.max(4000, words * 500);
 }
 
-async function renderRadioCouloir() {
+async function renderRadioCouloir(forceRefresh = false) {
     const textEl    = document.getElementById('radio-couloir-text');
     const counterEl = document.getElementById('radio-couloir-counter');
     if (!textEl || !counterEl) return;
 
     // Chargement depuis le backend
     try {
-        const data = await requestJson('/radio');
-        radioCouloirItems = Array.isArray(data) ? data : (data?.items || data?.radioItems || []);
+        const data = await requestJson('/radio', { cache: !forceRefresh });
+        const items = Array.isArray(data) ? data : (data?.items || data?.radioItems || data?.radio?.items || data?.data || []);
+        radioCouloirItems = Array.isArray(items) ? items : [];
     } catch (e) {
         // fallback : items vides
         radioCouloirItems = [];
@@ -322,22 +319,30 @@ async function renderRadioCouloir() {
 // -----------------------------------------------------------------------
 // PAGE CLASSEMENT
 // -----------------------------------------------------------------------
-async function renderClassementPage() {
+async function renderClassementPage(forceRefresh = false) {
     try {
-        const data = await requestJson('/classement');
+        let data = await requestJson('/classement', { cache: !forceRefresh });
+        if (!data || (!data.top && !data.queen && !data.participants && !data.data)) {
+            const participantsData = await requestJson('/participants', { cache: !forceRefresh });
+            const participants = Array.isArray(participantsData) ? participantsData : (participantsData?.participants || participantsData?.data || []);
+            const top = [...participants].sort((a, b) => (b.votes || 0) - (a.votes || 0));
+            data = { queen: top[0] || null, top, participants: top };
+        }
 
         const topParticipant = document.getElementById('top-participant');
         const topFive        = document.getElementById('top-five');
         const leaderboard    = document.getElementById('leaderboard-list');
+        const ranking = Array.isArray(data?.top) ? data.top : (Array.isArray(data?.participants) ? data.participants : (Array.isArray(data?.data) ? data.data : []));
+        const queen = data?.queen || ranking[0] || null;
 
         if (topParticipant) {
-            topParticipant.innerHTML = data.queen
+            topParticipant.innerHTML = queen
                 ? `<div class="queen-card">
-                       <img src="${data.queen.photo}" alt="${data.queen.name}">
+                       <img src="${queen.photo}" alt="${queen.name}">
                        <div>
-                           <h2>${data.queen.name}</h2>
-                           <p class="badge">${data.queen.gender === 'F' ? 'Reine' : 'Roi'} du campus</p>
-                           <p>${data.queen.votes || 0} votes</p>
+                           <h2>${queen.name}</h2>
+                           <p class="badge">${queen.gender === 'F' ? 'Reine' : 'Roi'} du campus</p>
+                           <p>${queen.votes || 0} votes</p>
                        </div>
                    </div>`
                 : '<div class="comment-empty">Aucun participant.</div>';
@@ -345,7 +350,7 @@ async function renderClassementPage() {
 
         if (topFive) {
             topFive.innerHTML = '';
-            data.top.slice(0, 5).forEach((p, i) => {
+            ranking.slice(0, 5).forEach((p, i) => {
                 const el = document.createElement('div');
                 el.className = 'top-five-item';
                 el.innerHTML = `<img src="${p.photo}"><h3>${i + 1}. ${p.name}</h3><p>${p.votes || 0} votes</p>`;
@@ -355,7 +360,7 @@ async function renderClassementPage() {
 
         if (leaderboard) {
             leaderboard.innerHTML = '';
-            data.top.forEach((p, idx) => {
+            ranking.forEach((p, idx) => {
                 const row = document.createElement('div');
                 row.className = 'leader-row';
                 row.innerHTML = `<div class="rank">${idx + 1}</div><img src="${p.photo}">
@@ -416,9 +421,16 @@ function initRadioCouloir() {
 
 async function initApp() {
     setupAdminButtons();
+    if (document.body.classList.contains('page-home')) {
+        void gbaiPrefetch(['/participants', '/radio', '/classement', '/gazette']);
+    }
     if (document.querySelector('.duel-content'))       await renderClashPage();
     if (document.getElementById('radio-couloir-text')) await initRadioCouloir();
     if (document.getElementById('leaderboard-list'))   await renderClassementPage();
+
+    if (document.querySelector('.duel-content')) gbaiStartPolling(() => renderClashPage(true));
+    if (document.getElementById('radio-couloir-text')) gbaiStartPolling(() => renderRadioCouloir(true));
+    if (document.getElementById('leaderboard-list')) gbaiStartPolling(() => renderClassementPage(true));
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

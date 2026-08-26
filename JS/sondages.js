@@ -1,7 +1,9 @@
 const API_URL = 'https://gbai-rai-backend.vercel.app/api/sondages';
+let pollsRequest = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchAllPolls();
+    gbaiStartPolling(() => fetchAllPolls(true), 15000);
 
     const submitBtn = document.getElementById('submit-poll-btn');
     if (submitBtn) {
@@ -23,13 +25,17 @@ function formatDate(dateString) {
 }
 
 // 1. Récupération et affichage de TOUS les sondages
-async function fetchAllPolls() {
+async function fetchAllPolls(forceRefresh = false) {
     const listContainer = document.getElementById('polls-list-container');
     if (!listContainer) return;
 
     try {
-        const response = await fetch(API_URL);
-        const result = await response.json();
+        if (pollsRequest && !forceRefresh) return pollsRequest;
+        pollsRequest = fetch(`${API_URL}${forceRefresh ? `?t=${Date.now()}` : ''}`).then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        }).finally(() => { pollsRequest = null; });
+        const result = await pollsRequest;
 
         if (result.success && result.data && result.data.length > 0) {
             renderPollsList(result.data);
@@ -129,7 +135,7 @@ async function submitVote(sondageId, optionIndex) {
 
         if (result.success) {
             localStorage.setItem(`voted_sondage_${sondageId}`, optionIndex);
-            fetchAllPolls();
+            fetchAllPolls(true);
         } else {
             alert("Erreur lors de l'enregistrement du vote : " + result.message);
         }

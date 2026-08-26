@@ -80,7 +80,16 @@ function resetAdminAuthState() {
 
 async function requestJson(path, options = {}) {
     const url = `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
-    const response = await fetch(url, options);
+    const token = localStorage.getItem(ADMIN_SESSION_STORAGE_KEY) || '';
+    const requestOptions = {
+        ...options,
+        headers: {
+            ...(options.headers || {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(options.method && options.method.toUpperCase() !== 'GET' ? { 'Content-Type': 'application/json' } : {}),
+        }
+    };
+    const response = await fetch(url, requestOptions);
     const text = await response.text();
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return text ? JSON.parse(text) : null;
@@ -90,7 +99,7 @@ async function requestJson(path, options = {}) {
 async function loadData() {
     try {
         const payload = await requestJson('/participants');
-        participants = Array.isArray(payload) ? payload : (payload?.participants || []);
+        participants = Array.isArray(payload) ? payload : (payload?.participants || payload?.data || []);
     } catch (error) {
         console.error('Erreur de connexion au serveur Backend:', error);
         participants = [];
@@ -98,14 +107,15 @@ async function loadData() {
 
     try {
         const payload = await requestJson('/content');
-        if (payload && typeof payload === 'object') {
+        const content = payload?.content || payload?.data || payload || {};
+        if (content && typeof content === 'object') {
             clashContent = {
                 ...defaultClashContent,
-                ...payload,
-                title: payload.title || defaultClashContent.title,
-                description: payload.description || defaultClashContent.description,
-                summaryLeftTitle: payload.summaryLeftTitle || defaultClashContent.summaryLeftTitle,
-                summaryLeftText: payload.summaryLeftText || defaultClashContent.summaryLeftText
+                ...content,
+                title: content.title || defaultClashContent.title,
+                description: content.description || defaultClashContent.description,
+                summaryLeftTitle: content.summaryLeftTitle || defaultClashContent.summaryLeftTitle,
+                summaryLeftText: content.summaryLeftText || defaultClashContent.summaryLeftText
             };
         }
     } catch (error) {
@@ -116,7 +126,8 @@ async function loadData() {
 async function loadRadioItems() {
     try {
         const payload = await requestJson('/radio');
-        return Array.isArray(payload) ? payload : (payload?.items || payload?.radioItems || []);
+        const radio = payload?.radio || payload || {};
+        return Array.isArray(radio) ? radio : (radio?.items || radio?.radioItems || payload?.items || payload?.radioItems || []);
     } catch (error) {
         console.warn('Impossible de charger la radio depuis le backend:', error);
         return [];
@@ -126,7 +137,6 @@ async function loadRadioItems() {
 async function saveRadioItems(items) {
     return requestJson('/radio', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items })
     });
 }
@@ -134,7 +144,6 @@ async function saveRadioItems(items) {
 async function saveLocalConfig() {
     return requestJson('/content', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(clashContent)
     });
 }
@@ -548,7 +557,10 @@ function setupDashboardEvents() {
 
                 const response = await fetch(`${API_URL}/participants`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem(ADMIN_SESSION_STORAGE_KEY) || ''}`
+                    },
                     body: JSON.stringify({ name, photo: photoUrl, gender })
                 });
 

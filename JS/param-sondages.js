@@ -1,4 +1,5 @@
 const API_URL = 'https://gbai-rai-backend.vercel.app';
+const getAuthHeader = () => ({ Authorization: `Bearer ${localStorage.getItem('gbai_admin_session_token') || ''}` });
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchSondages();
@@ -53,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`${API_URL}/api/sondages`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
                     body: JSON.stringify({ question, options })
                 });
 
@@ -87,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!confirm('Voulez-vous vraiment supprimer TOUS les sondages ?')) return;
 
             try {
-                const response = await fetch(`${API_URL}/api/sondages`, { method: 'DELETE' });
+                const response = await fetch(`${API_URL}/api/sondages`, { method: 'DELETE', headers: getAuthHeader() });
                 if (response.ok) {
                     fetchSondages();
                 } else {
@@ -195,7 +196,7 @@ async function deleteProposition(id) {
     if (!confirm('Voulez-vous supprimer cette proposition ?')) return;
 
     try {
-        const response = await fetch(`${API_URL}/api/admin/propositions/${id}`, { method: 'DELETE' });
+        const response = await fetch(`${API_URL}/api/admin/propositions/${id}`, { method: 'DELETE', headers: getAuthHeader() });
         if (response.ok) {
             fetchPropositions();
         } else {
@@ -211,7 +212,7 @@ async function deleteSondage(id) {
     if (!confirm('Voulez-vous vraiment supprimer ce sondage ?')) return;
 
     try {
-        const response = await fetch(`${API_URL}/api/sondages/${id}`, { method: 'DELETE' });
+        const response = await fetch(`${API_URL}/api/sondages/${id}`, { method: 'DELETE', headers: getAuthHeader() });
         if (response.ok) {
             fetchSondages();
         } else {
